@@ -1,3 +1,4 @@
+/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
 //<nowiki>
 
 <!-- main -->
@@ -5,23 +6,23 @@
 	<div class="initial-header">
 		<span>AFCH v<span title="{{versionName}}">{{version}}</span>&nbsp;
 		(<!-- Disabled due to issue #71 <span class="feedback-wrapper"></span> | --><span class="preferences-wrapper"></span>)</span>
-		Reviewing "{{title}}"
+		审阅"{{title}}"
 	</div>
 	<div class="warnings hidden"></div>
 	<div class="button-wrapper">
-		{{#accept}}<a id="afchAccept" class="accept afch-button gradient-button">Accept</a>{{/accept}}
-		{{#decline}}<a id="afchDecline" class="decline afch-button gradient-button">Decline/Reject</a>{{/decline}}
-		{{#comment}}<a id="afchComment" class="comment afch-button gradient-button">Comment</a>{{/comment}}
-		{{#submit}}<a id="afchSubmit" class="submit afch-button gradient-button">Submit</a>{{/submit}}
-		<a id="afchG13" class="g13 afch-button gradient-button g13-related {{^g13}}hidden{{/g13}}">Request G13 deletion</a>
-		<a id="afchPostponeG13" class="postpone-g13 afch-button gradient-button g13-related {{^g13}}hidden{{/g13}}">Postpone G13</a>
+		{{#accept}}<a id="afchAccept" class="accept afch-button gradient-button">接受</a>{{/accept}}
+		{{#decline}}<a id="afchDecline" class="decline afch-button gradient-button">拒绝</a>{{/decline}}
+		{{#comment}}<a id="afchComment" class="comment afch-button gradient-button">评论</a>{{/comment}}
+		{{#submit}}<a id="afchSubmit" class="submit afch-button gradient-button">提交</a>{{/submit}}
+		<a id="afchG13" class="g13 afch-button gradient-button g13-related {{^g13}}hidden{{/g13}}">请求O7快速删除</a>
+		<a id="afchPostponeG13" class="postpone-g13 afch-button gradient-button g13-related {{^g13}}hidden{{/g13}}">推迟O7</a>
 		<div id="afchExtra" class="extra afch-button">
 			<div class="wrapper">
-				<div class="open" title="View additional options">«</div>
+				<div class="open" title="查看其它选项">«</div>
 				<div class="links">
-					<a id="afchClean" class="link">Clean submission</a>
+					<a id="afchClean" class="link">清理多余模板</a>
 					<a id="afchMark" class="link">
-						{{#alreadyUnderReview}}Unmark{{/alreadyUnderReview}}{{^alreadyUnderReview}}Mark{{/alreadyUnderReview}} as under review
+						{{#alreadyUnderReview}}取消{{/alreadyUnderReview}}{{^alreadyUnderReview}}{{/alreadyUnderReview}}标记为正在审阅
 					</a>
 				</div>
 			</div>
@@ -38,7 +39,7 @@
 			<td class="timestamp"><span title="{{timestamp}}">{{relativeTimestamp}}</span>:</td>
 			<td class="detail">
 				<span class="reason">{{{reason}}}</span>
-				<span class="actor">(deleted by <a href="{{deletorLink}}">{{deletor}}</a>)</span>
+				<span class="actor">(被<a href="{{deletorLink}}">{{deletor}}</a>删除)</span>
 			</td>
 		</tr>
 		{{/deletions}}
@@ -50,44 +51,44 @@
 <div class="review-panel {{actionClass}}">
 	<div class="header">{{actionTitle}}...</div>
 	<div id="afchContent" class="content centered">
-		<div id="afchSubmitForm" data-running="Working..." class="gradient-button button-centered {{actionClass}}">Working...</div>
+		<div id="afchSubmitForm" data-running="加载中..." class="gradient-button button-centered {{actionClass}}">加载中...</div>
 	</div>
 </div>
 <!-- /quick-action-processing -->
 
 <!-- accept -->
 <div class="review-panel accept">
-	<div class="header">Accepting...</div>
+	<div class="header">接收中...</div>
 	<div id="afchContent" class="content">
 
 		<div id="newTitleWrapper">
-			<label for="newTitle" class="afch-label">New title</label>
-			<input type="text" id="newTitle" class="afch-input afch-textfield" placeholder="Target page name"
+			<label for="newTitle" class="afch-label">新标题</label>
+			<input type="text" id="newTitle" class="afch-input afch-textfield" placeholder="目标页面名称"
 				{{#newTitle}}value="{{newTitle}}"{{/newTitle}} />
 			<span id="titleStatus"></span>
 		</div>
 
 		<div id="assessmentWrapper">
-			<label for="newAssessment" class="afch-label">Article assessment</label>
+			<label for="newAssessment" class="afch-label">条目评级</label>
 			<select id="newAssessment" class="afch-input">
 				<option value="" selected></option>
-				<option value="B">B-class</option>
-				<option value="C">C-class</option>
-				<option value="start">Start-class</option>
-				<option value="stub">Stub-class</option>
-				<option value="list">List-class</option>
-				<option value="disambig">Disambig-class</option>
-				<option value="template">Template-class</option>
-				<option value="redirect">Redirect-class</option>
-				<option value="portal">Portal-class</option>
-				<option value="project">Project-class</option>
-				<option value="na">NA-class</option>
+				<option value="stub">小作品</option>
+				<option value="start">初级</option>
+				<option value="C">丙级（C）</option>
+				<option value="B">乙级（B）</option>
+				<option value="list">列表</option>
+				<option value="disambig">消歧义</option>
+				<option value="template">模板</option>
+				<option value="redirect">重定向</option>
+				<option value="portal">主题</option>
+				<option value="project">计划</option>
+				<option value="na">未知</option>
 			</select>
 		</div>
 
 		{{#hasWikiProjects}}
 		<div id="wikiProjectWrapper">
-			<label for="newWikiProjects" class="afch-label">Add WikiProjects</label>
+			<label for="newWikiProjects" class="afch-label">添加维基专题</label>
 			<select id="newWikiProjects" class="afch-input" multiple>
 				{{#wikiProjects}}
 				<option value="{{templateName}}">{{displayName}}</option>
@@ -97,7 +98,7 @@
 		{{/hasWikiProjects}}
 
 		<div id="categoryWrapper">
-			<label for="newCategories" class="afch-label">Add categories</label>
+			<label for="newCategories" class="afch-label">添加分类</label>
 			<select id="newCategories" class="afch-input" multiple>
 				{{#categories}}
 				<option value="{{.}}" selected>{{.}}</option>
@@ -105,81 +106,19 @@
 			</select>
 		</div>
 
-		<div id="isBiographyWrapper">
-			<label for="isBiography" class="afch-label">Is the article a biography?</label>
-			<input type="checkbox" id="isBiography" class="afch-input"/>
-		</div>
-
-		<div id="bioOptionsWrapper" class="hidden">
-
-			<div id="subjectNameWrapper">
-				<label for="subjectName" class="afch-label">Subject name (last, first)</label>
-				<input type="text" id="subjectName" class="afch-input afch-textfield" placeholder="Magellan, Ferdinand"/>
-			</div>
-
-			<div id="subjectDescriptionWrapper">
-				<label for="subjectDescription" class="afch-label">Description of the subject</label>
-				<input type="text" id="subjectDescription" class="afch-input afch-textfield" placeholder="Sea explorer"/>
-			</div>
-
-			<div id="birthYearWrapper">
-				<label for="birthYear" class="afch-label">Year of birth</label>
-				<input type="text" id="birthYear" class="afch-input afch-textfield" placeholder="1901"/>
-			</div>
-
-			<div id="birthMonthDayWrapper" class="hidden">
-				<label for="birthMonthDay" class="afch-label">Month and day of birth</label>
-				<input type="text" id="birthMonthDay" class="afch-input afch-textfield" placeholder="November 2"/>
-			</div>
-
-			<div id="birthPlaceWrapper">
-				<label for="birthPlace" class="afch-label">Place of birth</label>
-				<input type="text" id="birthPlace" class="afch-input afch-textfield" placeholder="Memphis, Tennessee"/>
-			</div>
-
-			<div id="lifeStatusWrapper">
-				<label for="lifeStatus" class="afch-label">Is the subject alive?</label>
-				<select id="lifeStatus" class="afch-input">
-					<option value="unknown" selected>Unknown</option>
-					<option value="living">Living</option>
-					<option value="dead">Dead</option>
-				</select>
-			</div>
-
-			<div id="deathWrapper" class="hidden">
-
-				<div id="deathYearWrapper">
-					<label for="deathYear" class="afch-label">Year of death</label>
-					<input type="text" id="deathYear" class="afch-input afch-textfield" placeholder="1999"/>
-				</div>
-
-				<div id="deathMonthDayWrapper" class="hidden">
-					<label for="deathMonthDay" class="afch-label">Month and day of death</label>
-					<input type="text" id="deathMonthDay" class="afch-input afch-textfield" placeholder="December 13"/>
-				</div>
-
-				<div id="deathPlaceWrapper">
-					<label for="deathPlace" class="afch-label">Place of death</label>
-					<input type="text" id="deathPlace" class="afch-input afch-textfield" placeholder="London, England"/>
-				</div>
-
-			</div>
-
-		</div>
-
 		{{#showPatrolOption}}
 		<div id="patrolPageWrapper">
-			<label for="patrolPage" class="afch-label">Mark page as patrolled</label>
+			<label for="patrolPage" class="afch-label">将页面标记为已巡查</label>
 			<input type="checkbox" id="patrolPage" class="afch-input"/>
 		</div>
 		{{/showPatrolOption}}
 
 		<div id="notifyWrapper">
-			<label for="notifyUser" class="afch-label">Notify submitter</label>
+			<label for="notifyUser" class="afch-label">通知提交者</label>
 			<input type="checkbox" id="notifyUser" class="afch-input" checked/>
 		</div>
 
-		<div id="afchSubmitForm" data-running="Accepting submission..." class="gradient-button accept">Accept &amp; publish</div>
+		<div id="afchSubmitForm" data-running="接受草稿中..." class="gradient-button accept">接受 &amp; 发布</div>
 
 	</div>
 </div>
@@ -187,69 +126,55 @@
 
 <!-- decline -->
 <div class="review-panel decline">
-	<div class="header">Declining...</div>
+	<div class="header">拒绝草稿中...</div>
 	<div id="afchContent" class="content centered">
 
 		<fieldset id="declineRejectWrapper" class="radioContainer afch-input" name="declineReject">
 			<input type="radio" id="declineRejectDecline" name="declineReject" value="decline" checked />
-			<label for="declineRejectDecline"><b>Decline</b> (for later improvement &amp; resubmission)</label>
+			<label for="declineRejectDecline"><b>仍需改善</b> (提交次数较少，且有改善空间)</label>
 			&emsp;
 			<input type="radio" id="declineRejectReject" name="declineReject" value="reject" />
-			<label for="declineRejectReject"><b>Reject</b> (unsuitable topic; no option to resubmit)</label>
+			<label for="declineRejectReject"><b>拒绝再次提交</b> (不适合的主题，且反复提交未见改善)</label>
 		</fieldset>
 
 		<div id="declineReasonWrapper">
 			<select id="declineReason" class="afch-input text-left" multiple="multiple">
 				<option value=""></option>
-				<optgroup label="Notability">
-					<option value="neo">neo - Submission is about a neologisim not yet shown to meet notability guidelines</option>
-					<option value="web">web - Submission is about web content not yet shown to meet notability guidelines</option>
-					<option value="prof">prof - Submission is about a professor not yet shown to meet notability guidelines</option>
-					<option value="athlete">athlete - Submission is about an athlete not yet shown to meet notability guidelines</option>
-					<option value="music">music - Submission is about a musician or musical work not yet shown to meet notability guidelines</option>
-					<option value="film">film - Submission is about a film not yet shown to meet notability guidelines</option>
-					<option value="corp">corp - Submission is about a company or organization not yet shown to meet notability guidelines</option>
-					<option value="bio">bio - Submission is about a person not yet shown to meet notability guidelines</option>
-					<option value="nn">nn - Submission is about a topic not yet shown to meet general notability guidelines (be more specific if possible)</option>
+				<optgroup label="其它">
+					<option value="reason">自定义 - 自定义理由</option>
 				</optgroup>
-				<optgroup label="Invalid submissions">
-					<option value="blank">blank - Submission is blank</option>
-					<option value="lang">lang - Submission is not in English</option>
-					<option value="test">test - Submission appears to be a test edit</option>
-					<option value="redirect">redirect - Submission is a redirect request</option>
+				<optgroup label="无效提交">
+					<option value="A1">A1 - 正文内容非常短小、内容空泛或仅有定义的小小作品</option>
+					<option value="A2">A2 - 内容只包括外部链接、参见、图书参考、分类、模板、跨语言链接的条目（消歧义页、重定向、软重定向除外）</option>
+					<option value="G2">G1/G2 - 没有实际的内容或像是编辑测试</option>
 				</optgroup>
-				<optgroup label="BLP &amp; vandalism">
-					<option value="van">van - Submission is vandalism, a negative unsourced BLP, or an attack page</option>
-					<option value="ilc">ilc - Submission is a BLP that does not meet minimum inline citation requirements</option>
-					<option value="blp">blp - BLP contains unsourced, possibly defamatory claims (AGF and wait for sources)</option>
+				<optgroup label="关注度">
+					<option value="N">N - 尚不符合通用关注度指引</option>
+					<option value="book">book - 尚不符合书籍关注度指引</option>
+					<option value="bio">bio - 尚不符合人物关注度指引</option>
+					<option value="geo">geo - 尚不符合地理关注度指引</option>
+					<option value="invalid">invalid - 来源未构成有效介绍</option>
 				</optgroup>
-				<optgroup label="Submission content">
-					<option value="cv">cv - Submission is a copyright violation</option>
-					<option value="v">v - Submission is improperly sourced</option>
-					<option value="not">not - Submission fails [[Wikipedia:What Wikipedia is not]]</option>
-					<option value="news">news - Submission appears to be a news story of a single event</option>
-					<option value="dict">dict - Submission is a dictionary definition</option>
-					<option value="plot">plot - Submission consists mostly of a plot summary</option>
-					<option value="joke">joke - Submission appears to be a joke or hoax</option>
+				<optgroup label="来源不足">
+					<option value="primary">primary - 依赖第一手来源</option>
+					<option value="OR">or - 疑似原创研究或创新理念</option>
+					<option value="no footnotes">no footnotes - 没有内文脚注</option>
+					<option value="unreferenced">unreferenced - 没有任何来源</option>
+					<option value="rs">rs - 缺少可靠来源</option>
 				</optgroup>
-				<optgroup label="Prose issues">
-					<option value="essay">essay - Submission reads like an essay</option>
-					<option value="npov">npov - Submission is not written in a formal, neutral encyclopedic tone</option>
-					<option value="adv">adv - Submission reads like an advertisement</option>
-				</optgroup>
-				<optgroup label="Duplicate articles">
-					<option value="exists">exists - Submission is duplicated by another article already in mainspace</option>
-					<option value="dup">dup - Submission is a duplicate of another existing submission</option>
-				</optgroup>
-				<optgroup label="Other">
-					<option value="reason">custom - Enter decline reason in the box below</option>
-					<option value="context">context - Submission provides insufficient context</option>
-					<option value="mergeto">mergeto - Submission should be merged into an existing article</option>
+				<optgroup label="内容">
+					<option value="cv">cv - 疑似侵犯版权</option>
+					<option value="lang">notmandarin - 包含过多不是现代标准汉语的内容</option>
+					<option value="A6">A6 - 复制自其他维基百科语言版本，且完全没有翻译。</option>
+					<option value="npov">npov - 不中立</option>
+					<option value="G11">G11 - 疑似广告宣传</option>
+					<option value="coi">coi - 疑似利益冲突</option>	
+					<option value="merge">merge - 合并至现有条目</option>	
 				</optgroup>
 			</select>
 
 			<div id="previewWrapper">
-				<a id="previewTrigger" class="link" role="button">(preview)</a>
+				<a id="previewTrigger" class="link" role="button">(显示预览)</a>
 				<div id="previewContainer"></div>
 			</div>
 		</div>
@@ -257,8 +182,18 @@
 		<div id="rejectReasonWrapper" class="hidden">
 			<select id="rejectReason" class="afch-input text-left" multiple="multiple">
 				<option value=""></option>
-				<option value="n">n - Topic is not notable</option>
-				<option value="e">e - Topic is contrary to the purpose of Wikipedia</option>
+				<optgroup label="维基百科不是什么">
+				<option value="neo">dict - 内容短小或尚不符合通用关注度指引的词条</option>
+				<option value="OR">OR - 主题很大篇幅都是原创研究，且无法根据第二手来源证实</option>
+				<option value="guide">guide - 手册、攻略、教科书</option>
+				<option value="voy">voy - 包含景点、商店等具体信息的旅游指南</option>
+			</optgroup>
+				<optgroup label="其它典型">
+				<option value="N">N - 主题始终无法被证实具有关注度</option>
+				<option value="G3">G3 - 纯粹破坏，包括但不限于明显的恶作剧、错误信息、人身攻击等</option>
+				<option value="G12">G12 - 未列明来源且语调负面的生者传记</option>
+				<option value="spa">SPA - 明显的广告宣传，且多次提交未见改善</option>
+				<option value="rs">rs - 始终无法提供可靠来源</option>
 			</select>
 		</div>
 
@@ -275,40 +210,40 @@
 			</div>
 
 			<div id="cvUrlWrapper" class="afch-option hidden">
-				<label for="cvUrlTextarea" class="afch-label">Original URLs (one per line)</label>
+				<label for="cvUrlTextarea" class="afch-label">侵权来源链接（每行一个）</label>
 				<textarea id="cvUrlTextarea" class="afch-input afch-textfield afch-textarea"
-					placeholder="Enter original URLs here, one per line."
+					placeholder="侵权来源链接（每行一个）"
 					cols="110" rows="3"></textarea>
 			</div>
 
 			<textarea id="declineTextarea" class="afch-input afch-textfield afch-textarea"
-				placeholder="Elaborate on your decline reason here using wikicode syntax."
+				placeholder="必要时，在这里加上额外的点评，可以使用维基语法"
 				cols="100" rows="5"></textarea>
 
 			<div id="csdWrapper" class="afch-option hidden">
 				<input type="checkbox" id="csdSubmission" class="afch-input"/>
-				<label for="csdSubmission" class="afch-label">Nominate the submission for speedy deletion</label>
+				<label for="csdSubmission" class="afch-label">提报快速删除</label>
 			</div>
 		</div>
 
 		<div id="rejectInputWrapper" class="hidden">
 			<textarea id="rejectTextarea" class="afch-input afch-textfield afch-textarea"
-				placeholder="Elaborate on your reject reason here using wikicode syntax."
+				placeholder="必要时，在这里加上额外的点评，可以使用维基语法"
 				cols="100" rows="5"></textarea>
 		</div>
 
 		<div id="notifyWrapper" class="hidden">
 			<div class="afch-option">
 				<input type="checkbox" id="notifyUser" class="afch-input" checked/>
-				<label for="notifyUser" class="afch-label">Notify submitter</label>
+				<label for="notifyUser" class="afch-label">通知提交者</label>
 			</div>
 			<div class="afch-option">
-				<input type="checkbox" id="inviteToTeahouse" class="afch-input" checked/>
-				<label for="inviteToTeahouse" class="afch-label">Invite submitter to Teahouse <small>(if they haven't been invited yet)</small></label>
+				<input type="checkbox" id="inviteToTeahouse" class="afch-input" />
+				<label for="inviteToTeahouse" class="afch-label">邀请前往互助客栈或即时聊天求助 <small>(对已经收到的用户无效)</small></label>
 			</div>
 		</div>
 
-		<div id="afchSubmitForm" data-running="Declining submission..." class="gradient-button button-centered decline hidden">Decline submission</div>
+		<div id="afchSubmitForm" data-running="拒绝草稿..." class="gradient-button button-centered decline hidden">拒绝草稿</div>
 
 	</div>
 </div>
@@ -316,19 +251,19 @@
 
 <!-- comment -->
 <div class="review-panel comment">
-	<div class="header">Commenting...</div>
+	<div class="header">评论中...</div>
 	<div id="afchContent" class="content centered">
 
 		<textarea id="commentText" class="afch-input afch-textfield afch-textarea"
-			placeholder="Enter your comment about the submission using wikicode syntax. Your signature will be added automatically."
+			placeholder="输入您对提交的草稿的评论（可使用维基语法）。您的签名将自动添加。"
 			cols="100" rows="5"></textarea>
 
 	<div class="afch-option">
 		<input type="checkbox" id="notifyUser" class="afch-input" {{#notifyByDefault}}checked{{/notifyByDefault}} />
-		<label for="notifyUser" class="afch-label">Notify submitter</label>
+		<label for="notifyUser" class="afch-label">通知提交者</label>
 	</div>
 
-		<div id="afchSubmitForm" data-running="Commenting on submission..." class="gradient-button button-centered comment">Post comment</div>
+		<div id="afchSubmitForm" data-running="提交点评中..." class="gradient-button button-centered comment">提交点评</div>
 
 	</div>
 </div>
@@ -336,24 +271,24 @@
 
 <!-- submit -->
 <div class="review-panel submit">
-	<div class="header">Submitting...</div>
+	<div class="header">提交中...</div>
 	<div id="afchContent" class="content centered">
-		<label for="submitType" class="afch-label">Submit as</label>
+		<label for="submitType" class="afch-label">提交身份</label>
 		<select id="submitType" class="afch-input">
 			{{#customSubmitters}}
-			<option value="{{name}}" {{#selected}}selected{{/selected}}>{{description}}</option>
+			<option value="{{name}}" {{#selected}}已选中{{/selected}}>{{description}}</option>
 			{{/customSubmitters}}
-			<option value="creator">Page creator</option>
-			<option value="self">Yourself</option>
-			<option value="other">Someone else</option>
+			<option value="creator">页面创建者</option>
+			<option value="self">您自己</option>
+			<option value="other">其他人</option>
 		</select>
 
 		<div id="submitterNameWrapper" class="hidden">
-			<input type="text" id="submitterName" class="afch-input afch-textfield" placeholder="Username" />
+			<input type="text" id="submitterName" class="afch-input afch-textfield" placeholder="用户名" />
 			<div id="submitterNameStatus" class="error"></div>
 		</div>
 
-		<div id="afchSubmitForm" data-running="Submitting..." class="gradient-button button-centered submit">Submit</div>
+		<div id="afchSubmitForm" data-running="提交中..." class="gradient-button button-centered submit">提交</div>
 
 	</div>
 </div>
@@ -361,14 +296,14 @@
 
 <!-- postpone-g13 -->
 <div class="review-panel postpone-g13">
-	<div class="header">Postponing...</div>
+	<div class="header">推迟中...</div>
 	<div id="afchContent" class="content centered">
 		<textarea id="commentText" class="afch-input afch-textfield afch-textarea"
 			placeholder="Enter your rationale for postponing deletion, which will be added to the submission as a new comment."
 			cols="100" rows="5"></textarea>
 
 		<div id="afchSubmitForm" data-running="Postponing..." class="gradient-button button-centered postpone-g13">
-			Postpone deletion
+			推迟删除
 		</div>
 
 	</div>

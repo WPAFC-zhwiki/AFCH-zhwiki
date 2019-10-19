@@ -1,4 +1,565 @@
-//<nowiki>
+/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
+
+var Hogan = {};
+
+(function (Hogan, useArrayBuffer) {
+  Hogan.Template = function (renderFunc, text, compiler, options) {
+    this.r = renderFunc || this.r;
+    this.c = compiler;
+    this.options = options;
+    this.text = text || '';
+    this.buf = (useArrayBuffer) ? [] : '';
+  }
+
+  Hogan.Template.prototype = {
+    // render: replaced by generated code.
+    r: function (context, partials, indent) { return ''; },
+
+    // variable escaping
+    v: hoganEscape,
+
+    // triple stache
+    t: coerceToString,
+
+    render: function render(context, partials, indent) {
+      return this.ri([context], partials || {}, indent);
+    },
+
+    // render internal -- a hook for overrides that catches partials too
+    ri: function (context, partials, indent) {
+      return this.r(context, partials, indent);
+    },
+
+    // tries to find a partial in the curent scope and render it
+    rp: function(name, context, partials, indent) {
+      var partial = partials[name];
+
+      if (!partial) {
+        return '';
+      }
+
+      if (this.c && typeof partial == 'string') {
+        partial = this.c.compile(partial, this.options);
+      }
+
+      return partial.ri(context, partials, indent);
+    },
+
+    // render a section
+    rs: function(context, partials, section) {
+      var tail = context[context.length - 1];
+
+      if (!isArray(tail)) {
+        section(context, partials, this);
+        return;
+      }
+
+      for (var i = 0; i < tail.length; i++) {
+        context.push(tail[i]);
+        section(context, partials, this);
+        context.pop();
+      }
+    },
+
+    // maybe start a section
+    s: function(val, ctx, partials, inverted, start, end, tags) {
+      var pass;
+
+      if (isArray(val) && val.length === 0) {
+        return false;
+      }
+
+      if (typeof val == 'function') {
+        val = this.ls(val, ctx, partials, inverted, start, end, tags);
+      }
+
+      pass = (val === '') || !!val;
+
+      if (!inverted && pass && ctx) {
+        ctx.push((typeof val == 'object') ? val : ctx[ctx.length - 1]);
+      }
+
+      return pass;
+    },
+
+    // find values with dotted names
+    d: function(key, ctx, partials, returnFound) {
+      var names = key.split('.'),
+          val = this.f(names[0], ctx, partials, returnFound),
+          cx = null;
+
+      if (key === '.' && isArray(ctx[ctx.length - 2])) {
+        return ctx[ctx.length - 1];
+      }
+
+      for (var i = 1; i < names.length; i++) {
+        if (val && typeof val == 'object' && names[i] in val) {
+          cx = val;
+          val = val[names[i]];
+        } else {
+          val = '';
+        }
+      }
+
+      if (returnFound && !val) {
+        return false;
+      }
+
+      if (!returnFound && typeof val == 'function') {
+        ctx.push(cx);
+        val = this.lv(val, ctx, partials);
+        ctx.pop();
+      }
+
+      return val;
+    },
+
+    // find values with normal names
+    f: function(key, ctx, partials, returnFound) {
+      var val = false,
+          v = null,
+          found = false;
+
+      for (var i = ctx.length - 1; i >= 0; i--) {
+        v = ctx[i];
+        if (v && typeof v == 'object' && key in v) {
+          val = v[key];
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        return (returnFound) ? false : "";
+      }
+
+      if (!returnFound && typeof val == 'function') {
+        val = this.lv(val, ctx, partials);
+      }
+
+      return val;
+    },
+
+    // higher order templates
+    ho: function(val, cx, partials, text, tags) {
+      var compiler = this.c;
+      var options = this.options;
+      options.delimiters = tags;
+      var text = val.call(cx, text);
+      text = (text == null) ? String(text) : text.toString();
+      this.b(compiler.compile(text, options).render(cx, partials));
+      return false;
+    },
+
+    // template result buffering
+    b: (useArrayBuffer) ? function(s) { this.buf.push(s); } :
+                          function(s) { this.buf += s; },
+    fl: (useArrayBuffer) ? function() { var r = this.buf.join(''); this.buf = []; return r; } :
+                           function() { var r = this.buf; this.buf = ''; return r; },
+
+    // lambda replace section
+    ls: function(val, ctx, partials, inverted, start, end, tags) {
+      var cx = ctx[ctx.length - 1],
+          t = null;
+
+      if (!inverted && this.c && val.length > 0) {
+        return this.ho(val, cx, partials, this.text.substring(start, end), tags);
+      }
+
+      t = val.call(cx);
+
+      if (typeof t == 'function') {
+        if (inverted) {
+          return true;
+        } else if (this.c) {
+          return this.ho(t, cx, partials, this.text.substring(start, end), tags);
+        }
+      }
+
+      return t;
+    },
+
+    // lambda replace variable
+    lv: function(val, ctx, partials) {
+      var cx = ctx[ctx.length - 1];
+      var result = val.call(cx);
+
+      if (typeof result == 'function') {
+        result = coerceToString(result.call(cx));
+        if (this.c && ~result.indexOf("{\u007B")) {
+          return this.c.compile(result, this.options).render(cx, partials);
+        }
+      }
+
+      return coerceToString(result);
+    }
+
+  };
+
+  var rAmp = /&/g,
+      rLt = /</g,
+      rGt = />/g,
+      rApos =/\'/g,
+      rQuot = /\"/g,
+      hChars =/[&<>\"\']/;
+
+
+  function coerceToString(val) {
+    return String((val === null || val === undefined) ? '' : val);
+  }
+
+  function hoganEscape(str) {
+    str = coerceToString(str);
+    return hChars.test(str) ?
+      str
+        .replace(rAmp,'&amp;')
+        .replace(rLt,'&lt;')
+        .replace(rGt,'&gt;')
+        .replace(rApos,'&#39;')
+        .replace(rQuot, '&quot;') :
+      str;
+  }
+
+  var isArray = Array.isArray || function(a) {
+    return Object.prototype.toString.call(a) === '[object Array]';
+  };
+
+})(typeof exports !== 'undefined' ? exports : Hogan);
+
+
+
+
+(function (Hogan) {
+  // Setup regex  assignments
+  // remove whitespace according to Mustache spec
+  var rIsWhitespace = /\S/,
+      rQuot = /\"/g,
+      rNewline =  /\n/g,
+      rCr = /\r/g,
+      rSlash = /\\/g,
+      tagTypes = {
+        '#': 1, '^': 2, '/': 3,  '!': 4, '>': 5,
+        '<': 6, '=': 7, '_v': 8, '{': 9, '&': 10
+      };
+
+  Hogan.scan = function scan(text, delimiters) {
+    var len = text.length,
+        IN_TEXT = 0,
+        IN_TAG_TYPE = 1,
+        IN_TAG = 2,
+        state = IN_TEXT,
+        tagType = null,
+        tag = null,
+        buf = '',
+        tokens = [],
+        seenTag = false,
+        i = 0,
+        lineStart = 0,
+        otag = '{{',
+        ctag = '}}';
+
+    function addBuf() {
+      if (buf.length > 0) {
+        tokens.push(new String(buf));
+        buf = '';
+      }
+    }
+
+    function lineIsWhitespace() {
+      var isAllWhitespace = true;
+      for (var j = lineStart; j < tokens.length; j++) {
+        isAllWhitespace =
+          (tokens[j].tag && tagTypes[tokens[j].tag] < tagTypes['_v']) ||
+          (!tokens[j].tag && tokens[j].match(rIsWhitespace) === null);
+        if (!isAllWhitespace) {
+          return false;
+        }
+      }
+
+      return isAllWhitespace;
+    }
+
+    function filterLine(haveSeenTag, noNewLine) {
+      addBuf();
+
+      if (haveSeenTag && lineIsWhitespace()) {
+        for (var j = lineStart, next; j < tokens.length; j++) {
+          if (!tokens[j].tag) {
+            if ((next = tokens[j+1]) && next.tag == '>') {
+              // set indent to token value
+              next.indent = tokens[j].toString()
+            }
+            tokens.splice(j, 1);
+          }
+        }
+      } else if (!noNewLine) {
+        tokens.push({tag:'\n'});
+      }
+
+      seenTag = false;
+      lineStart = tokens.length;
+    }
+
+    function changeDelimiters(text, index) {
+      var close = '=' + ctag,
+          closeIndex = text.indexOf(close, index),
+          delimiters = trim(
+            text.substring(text.indexOf('=', index) + 1, closeIndex)
+          ).split(' ');
+
+      otag = delimiters[0];
+      ctag = delimiters[1];
+
+      return closeIndex + close.length - 1;
+    }
+
+    if (delimiters) {
+      delimiters = delimiters.split(' ');
+      otag = delimiters[0];
+      ctag = delimiters[1];
+    }
+
+    for (i = 0; i < len; i++) {
+      if (state == IN_TEXT) {
+        if (tagChange(otag, text, i)) {
+          --i;
+          addBuf();
+          state = IN_TAG_TYPE;
+        } else {
+          if (text.charAt(i) == '\n') {
+            filterLine(seenTag);
+          } else {
+            buf += text.charAt(i);
+          }
+        }
+      } else if (state == IN_TAG_TYPE) {
+        i += otag.length - 1;
+        tag = tagTypes[text.charAt(i + 1)];
+        tagType = tag ? text.charAt(i + 1) : '_v';
+        if (tagType == '=') {
+          i = changeDelimiters(text, i);
+          state = IN_TEXT;
+        } else {
+          if (tag) {
+            i++;
+          }
+          state = IN_TAG;
+        }
+        seenTag = i;
+      } else {
+        if (tagChange(ctag, text, i)) {
+          tokens.push({tag: tagType, n: trim(buf), otag: otag, ctag: ctag,
+                       i: (tagType == '/') ? seenTag - ctag.length : i + otag.length});
+          buf = '';
+          i += ctag.length - 1;
+          state = IN_TEXT;
+          if (tagType == '{') {
+            if (ctag == '}}') {
+              i++;
+            } else {
+              cleanTripleStache(tokens[tokens.length - 1]);
+            }
+          }
+        } else {
+          buf += text.charAt(i);
+        }
+      }
+    }
+
+    filterLine(seenTag, true);
+
+    return tokens;
+  }
+
+  function cleanTripleStache(token) {
+    if (token.n.substr(token.n.length - 1) === '}') {
+      token.n = token.n.substring(0, token.n.length - 1);
+    }
+  }
+
+  function trim(s) {
+    if (s.trim) {
+      return s.trim();
+    }
+
+    return s.replace(/^\s*|\s*$/g, '');
+  }
+
+  function tagChange(tag, text, index) {
+    if (text.charAt(index) != tag.charAt(0)) {
+      return false;
+    }
+
+    for (var i = 1, l = tag.length; i < l; i++) {
+      if (text.charAt(index + i) != tag.charAt(i)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function buildTree(tokens, kind, stack, customTags) {
+    var instructions = [],
+        opener = null,
+        token = null;
+
+    while (tokens.length > 0) {
+      token = tokens.shift();
+      if (token.tag == '#' || token.tag == '^' || isOpener(token, customTags)) {
+        stack.push(token);
+        token.nodes = buildTree(tokens, token.tag, stack, customTags);
+        instructions.push(token);
+      } else if (token.tag == '/') {
+        if (stack.length === 0) {
+          throw new Error('Closing tag without opener: /' + token.n);
+        }
+        opener = stack.pop();
+        if (token.n != opener.n && !isCloser(token.n, opener.n, customTags)) {
+          throw new Error('Nesting error: ' + opener.n + ' vs. ' + token.n);
+        }
+        opener.end = token.i;
+        return instructions;
+      } else {
+        instructions.push(token);
+      }
+    }
+
+    if (stack.length > 0) {
+      throw new Error('missing closing tag: ' + stack.pop().n);
+    }
+
+    return instructions;
+  }
+
+  function isOpener(token, tags) {
+    for (var i = 0, l = tags.length; i < l; i++) {
+      if (tags[i].o == token.n) {
+        token.tag = '#';
+        return true;
+      }
+    }
+  }
+
+  function isCloser(close, open, tags) {
+    for (var i = 0, l = tags.length; i < l; i++) {
+      if (tags[i].c == close && tags[i].o == open) {
+        return true;
+      }
+    }
+  }
+
+  Hogan.generate = function (tree, text, options) {
+    var code = 'var _=this;_.b(i=i||"");' + walk(tree) + 'return _.fl();';
+    if (options.asString) {
+      return 'function(c,p,i){' + code + ';}';
+    }
+
+    return new Hogan.Template(new Function('c', 'p', 'i', code), text, Hogan, options);
+  }
+
+  function esc(s) {
+    return s.replace(rSlash, '\\\\')
+            .replace(rQuot, '\\\"')
+            .replace(rNewline, '\\n')
+            .replace(rCr, '\\r');
+  }
+
+  function chooseMethod(s) {
+    return (~s.indexOf('.')) ? 'd' : 'f';
+  }
+
+  function walk(tree) {
+    var code = '';
+    for (var i = 0, l = tree.length; i < l; i++) {
+      var tag = tree[i].tag;
+      if (tag == '#') {
+        code += section(tree[i].nodes, tree[i].n, chooseMethod(tree[i].n),
+                        tree[i].i, tree[i].end, tree[i].otag + " " + tree[i].ctag);
+      } else if (tag == '^') {
+        code += invertedSection(tree[i].nodes, tree[i].n,
+                                chooseMethod(tree[i].n));
+      } else if (tag == '<' || tag == '>') {
+        code += partial(tree[i]);
+      } else if (tag == '{' || tag == '&') {
+        code += tripleStache(tree[i].n, chooseMethod(tree[i].n));
+      } else if (tag == '\n') {
+        code += text('"\\n"' + (tree.length-1 == i ? '' : ' + i'));
+      } else if (tag == '_v') {
+        code += variable(tree[i].n, chooseMethod(tree[i].n));
+      } else if (tag === undefined) {
+        code += text('"' + esc(tree[i]) + '"');
+      }
+    }
+    return code;
+  }
+
+  function section(nodes, id, method, start, end, tags) {
+    return 'if(_.s(_.' + method + '("' + esc(id) + '",c,p,1),' +
+           'c,p,0,' + start + ',' + end + ',"' + tags + '")){' +
+           '_.rs(c,p,' +
+           'function(c,p,_){' +
+           walk(nodes) +
+           '});c.pop();}';
+  }
+
+  function invertedSection(nodes, id, method) {
+    return 'if(!_.s(_.' + method + '("' + esc(id) + '",c,p,1),c,p,1,0,0,"")){' +
+           walk(nodes) +
+           '};';
+  }
+
+  function partial(tok) {
+    return '_.b(_.rp("' +  esc(tok.n) + '",c,p,"' + (tok.indent || '') + '"));';
+  }
+
+  function tripleStache(id, method) {
+    return '_.b(_.t(_.' + method + '("' + esc(id) + '",c,p,0)));';
+  }
+
+  function variable(id, method) {
+    return '_.b(_.v(_.' + method + '("' + esc(id) + '",c,p,0)));';
+  }
+
+  function text(id) {
+    return '_.b(' + id + ');';
+  }
+
+  Hogan.parse = function(tokens, text, options) {
+    options = options || {};
+    return buildTree(tokens, '', [], options.sectionTags || []);
+  },
+
+  Hogan.cache = {};
+
+  Hogan.compile = function(text, options) {
+    // options
+    //
+    // asString: false (default)
+    //
+    // sectionTags: [{o: '_foo', c: 'foo'}]
+    // An array of object with o and c fields that indicate names for custom
+    // section tags. The example above allows parsing of {{_foo}}{{/foo}}.
+    //
+    // delimiters: A string that overrides the default delimiters.
+    // Example: "<% %>"
+    //
+    options = options || {};
+
+    var key = text + '||' + !!options.asString;
+
+    var t = this.cache[key];
+
+    if (t) {
+      return t;
+    }
+
+    t = this.generate(this.parse(this.scan(text, options.delimiters), text, options), text, options);
+    return this.cache[key] = t;
+  };
+})(typeof exports !== 'undefined' ? exports : Hogan);
+
+;//<nowiki>
 ( function ( AFCH, $, mw ) {
 	$.extend( AFCH, {
 
@@ -51,10 +612,7 @@
 				AFCH.error = 'AFCH requires AJAX';
 				return false;
 			}
-
-			if ( AFCH.consts.baseurl.indexOf( 'MediaWiki:' + 'Gadget-afch.js' ) === -1 ) {
 				AFCH.consts.beta = true;
-			}
 
 			AFCH.api = new mw.Api();
 
@@ -69,18 +627,18 @@
 				mockItUp: false,
 				// Full page name, "Wikipedia talk:Articles for creation/sandbox"
 				pagename: mw.config.get( 'wgPageName' ).replace( /_/g, ' ' ),
-				// Link to the current page, "/wiki/Wikipedia talk:Articles for creation/sandbox"
+				// Link to the current page, "/wiki/Wikipedia talk:建立條目專題/沙盒"
 				pagelink: mw.util.getUrl(),
 				// Used when status is disabled
 				nullstatus: { update: function () { return; } },
 				// Current user
 				user: mw.user.getName(),
 				// Edit summary ad
-				summaryAd: ' ([[WP:AFCH|AFCH]] ' + AFCH.consts.version + ')',
+				summaryAd: ' ([[WP:AFCH|AFCH]])',
 				// Require users to be on whitelist to use the script
 				whitelistRequired: true,
 				// Name of the whitelist page for reviewers
-				whitelistTitle: 'Wikipedia:WikiProject Articles for creation/Participants'
+				whitelistTitle: 'Wikipedia:建立條目專題/參與者'
 			}, AFCH.consts );
 
 			// Check whitelist if necessary, but don't delay loading of the
@@ -115,9 +673,9 @@
 					// If we can detect that the gadget is currently enabled, offer a one-click "disable" link
 					if ( mw.user.options.get( 'gadget-afchelper' ) === '1' ) {
 						$howToDisable = $( '<span>' )
-							.append( 'If you wish to disable the helper script, ' )
+							.append( '如果要禁用帮助程序脚本， ' )
 							.append( $( '<a>' )
-								.text( 'click here' )
+								.text( '点击这里' )
 								.click( function () {
 									// Submit the API request to disable the gadget.
 									// Note: We don't use `AFCH.api` here, because AFCH has already been
@@ -136,26 +694,26 @@
 					// Otherwise, AFCH is probably installed via common.js/skin.js -- offer links for easy access.
 					} else {
 						$howToDisable = $( '<span>' )
-							.append( 'If you wish to disable the helper script, you will need to manually ' +
-								'remove it from your ' )
+							.append( '如果要禁用帮助程序脚本，则需要手动' +
+								'从你的' )
 							.append( AFCH.makeLinkElementToPage( 'Special:MyPage/common.js', 'common.js' ) )
-							.append( ' or your ' )
+							.append( '或' )
 							.append( AFCH.makeLinkElementToPage( 'Special:MyPage/skin.js', 'skin.js' ) )
-							.append( 'page. ' );
+							.append( '页面中移除。' );
 					}
 
 					// Finally, make and push the notification, then explode AFCH
 					mw.notify(
 						$( '<div>' )
-							.append( 'AFCH could not be loaded because "' + user + '" is not listed on ' )
+							.append( 'AFCH 不能加载，"' + user + '"没有列在' )
 							.append( AFCH.makeLinkElementToPage( whitelist.rawTitle ) )
-							.append( '. You can request access to the AfC helper script there. ' )
+							.append( '。您可以在那里申请使用AFC辅助脚本的权限。' )
 							.append( $howToDisable )
-							.append( 'If you have any questions or concerns, please ' )
-							.append( AFCH.makeLinkElementToPage( 'WT:AFCH', 'get in touch' ) )
+							.append( '如果您有任何问题或疑虑，请在' )
+							.append( AFCH.makeLinkElementToPage( 'WT:AFCH', '寻求帮助' ) )
 							.append( '!' ),
 						{
-							title: 'AFCH error: user not listed',
+							title: 'AFCH错误：用户不在允许列表中',
 							autoHide: false
 						}
 					);
@@ -176,7 +734,7 @@
 
 			if ( AFCH.consts.beta ) {
 				// Load minified css
-				mw.loader.load( AFCH.consts.scriptpath + '?action=raw&ctype=text/css&title=MediaWiki:Gadget-afch.css', 'text/css' );
+				mw.loader.load( AFCH.consts.scriptpath + '?action=raw&ctype=text/css&title=User:94rain/js/afch-master.css', 'text/css' );
 				// Load dependencies
 				mw.loader.load( [
 					// jquery resources
@@ -186,6 +744,7 @@
 
 					// mediawiki.api
 					'mediawiki.api',
+					'mediawiki.api.category',
 					'mediawiki.api.titleblacklist',
 
 					// mediawiki plugins
@@ -207,12 +766,12 @@
 		 */
 		initFeedback: function ( $element, type, linkText ) {
 			var feedback = new mw.Feedback( {
-				title: new mw.Title( 'Wikipedia talk:WikiProject Articles for creation/Helper script' ),
-				bugsLink: 'https://en.wikipedia.org/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Helper_script&action=edit&section=new',
-				bugsListLink: 'https://en.wikipedia.org/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Helper_script'
+				title: new mw.Title( 'Wikipedia talk:建立條目專題/協助腳本' ),
+				bugsLink: 'https://zh.wikipedia.org/w/index.php?title=Wikipedia_talk:建立條目專題/協助腳本&action=edit&section=new',
+				bugsListLink: 'https://zh.wikipedia.org/w/index.php?title=Wikipedia_talk:建立條目專題/協助腳本'
 			} );
 			$( '<span>' )
-				.text( linkText || 'Give feedback!' )
+				.text( linkText || '提供反馈！' )
 				.addClass( 'feedback-link link' )
 				.click( function () {
 					feedback.launch( {
@@ -557,7 +1116,7 @@
 					} )
 					.fail( function ( err ) {
 						deferred.reject( err );
-						status.update( 'Error getting $1: ' + JSON.stringify( err ) );
+						status.update( '无法获取$1: ' + JSON.stringify( err ) );
 					} );
 
 				return deferred;
@@ -583,7 +1142,7 @@
 				}
 
 				if ( !options.hide ) {
-					status = new AFCH.status.Element( ( options.statusText || 'Editing' ) + ' $1...',
+					status = new AFCH.status.Element( ( options.statusText || '正在编辑' ) + '$1...',
 						{ $1: AFCH.makeLinkElementToPage( pagename ) } );
 				} else {
 					status = AFCH.consts.nullstatus;
@@ -616,25 +1175,25 @@
 							deferred.resolve( data );
 
 							if ( data.edit.hasOwnProperty( 'nochange' ) ) {
-								status.update( 'No changes made to $1' );
+								status.update( '没有对$1作出任何更改' );
 								return;
 							}
 
 							// Create a link to the diff of the edit
 							$diffLink = AFCH.makeLinkElementToPage(
-								'Special:Diff/' + data.edit.oldrevid + '/' + data.edit.newrevid, '(diff)'
+								'Special:Diff/' + data.edit.oldrevid + '/' + data.edit.newrevid, '(差异)'
 							).addClass( 'text-smaller' );
 
-							status.update( 'Saved $1 ' + AFCH.jQueryToHtml( $diffLink ) );
+							status.update( '已保存$1的更改' + AFCH.jQueryToHtml( $diffLink ) );
 						} else {
 							deferred.reject( data );
 							// FIXME: get detailed error info from API result??
-							status.update( 'Error while saving $1: ' + JSON.stringify( data ) );
+							status.update( '保存$1的更改失败：' + JSON.stringify( data ) );
 						}
 					} )
 					.fail( function ( err ) {
 						deferred.reject( err );
-						status.update( 'Error while saving $1: ' + JSON.stringify( err ) );
+						status.update( '保存$1的更改失败：' + JSON.stringify( err ) );
 					} );
 
 				return deferred;
@@ -664,7 +1223,7 @@
 				var status, request, deferred = $.Deferred();
 
 				if ( !hide ) {
-					status = new AFCH.status.Element( 'Moving $1 to $2...', {
+					status = new AFCH.status.Element( '正在移动$1至$2...', {
 						$1: AFCH.makeLinkElementToPage( oldTitle ),
 						$2: AFCH.makeLinkElementToPage( newTitle )
 					} );
@@ -688,16 +1247,16 @@
 				AFCH.api.postWithToken( 'edit', request ) // Move token === edit token
 					.done( function ( data ) {
 						if ( data && data.move ) {
-							status.update( 'Moved $1 to $2' );
+							status.update( '移动$1至$2' );
 							deferred.resolve( data.move );
 						} else {
 							// FIXME: get detailed error info from API result??
-							status.update( 'Error moving $1 to $2: ' + JSON.stringify( data.error ) );
+							status.update( '移动$1至$2失败：' + JSON.stringify( data.error ) );
 							deferred.reject( data.error );
 						}
 					} )
 					.fail( function ( err ) {
-						status.update( 'Error moving $1 to $2: ' + JSON.stringify( err ) );
+						status.update( '移动$1至$2失败：' + JSON.stringify( err ) );
 						deferred.reject( err );
 					} );
 
@@ -721,9 +1280,9 @@
 				userTalkPage.exists().done( function ( exists ) {
 					userTalkPage.edit( {
 						contents: ( exists ? '' : '{{Talk header}}' ) + '\n\n' + options.message,
-						summary: options.summary || 'Notifying user',
+						summary: options.summary || '通知用户',
 						mode: 'appendtext',
-						statusText: 'Notifying',
+						statusText: '通知',
 						hide: options.hide
 					} )
 						.done( function () {
@@ -749,7 +1308,7 @@
 			logCSD: function ( options ) {
 				var deferred = $.Deferred(),
 					logPage = new AFCH.Page( 'User:' + mw.config.get( 'wgUserName' ) + '/' +
-						( window.Twinkle && window.Twinkle.getPref( 'speedyLogPageName' ) || 'CSD log' ) );
+						( window.Twinkle && window.Twinkle.getPref( 'speedyLogPageName' ) || 'CSD日志' ) );
 
 				// Abort if user disabled in preferences
 				if ( !AFCH.prefs.logCsd ) {
@@ -776,7 +1335,7 @@
 					appendText += '\n# [[:' + options.title + ']]: ' + options.reason;
 
 					if ( options.usersNotified && options.usersNotified.length ) {
-						appendText += '; notified {{user|1=' + options.usersNotified.shift() + '}}';
+						appendText += '; 通知{{user|1=' + options.usersNotified.shift() + '}}';
 
 						$.each( options.usersNotified, function ( _, user ) {
 							appendText += ', {{user|1=' + user + '}}';
@@ -788,8 +1347,8 @@
 					logPage.edit( {
 						contents: appendText,
 						mode: 'appendtext',
-						summary: 'Logging speedy deletion nomination of [[' + options.title + ']]',
-						statusText: 'Logging speedy deletion nomination to'
+						summary: '记录对[[' + options.title + ']]的快速删除提名',
+						statusText: '记录快速删除提名'
 					} ).done( function ( data ) {
 						deferred.resolve( data );
 					} ).fail( function ( data ) {
@@ -809,7 +1368,7 @@
 			 */
 			patrolRcid: function ( rcid, title ) {
 				var request, deferred = $.Deferred(),
-					status = new AFCH.status.Element( 'Patrolling $1...',
+					status = new AFCH.status.Element( '正在将$1标记为已巡查...',
 						{ $1: AFCH.makeLinkElementToPage( title ) || 'page with id #' + rcid } );
 
 				request = {
@@ -828,11 +1387,11 @@
 						status.update( 'Patrolled $1' );
 						deferred.resolve( data );
 					} else {
-						status.update( 'Failed to patrol $1: ' + JSON.stringify( data.patrol ) );
+						status.update( '将$1标记为已巡查失败：' + JSON.stringify( data.patrol ) );
 						deferred.reject( data );
 					}
 				} ).fail( function ( data ) {
-					status.update( 'Failed to patrol $1: ' + JSON.stringify( data ) );
+					status.update( '将$1标记为已巡查失败：' + JSON.stringify( data ) );
 					deferred.reject( data );
 				} );
 
@@ -921,12 +1480,7 @@
 			}
 		},
 
-		/**
-		 * A simple framework for getting/setting interface messages.
-		 * Not every message necessarily needs to go through here. But
-		 * it's nice to separate long messages from the code itself.
-		 * @type {Object}
-		 */
+
 		msg: {
 			/**
 			 * AFCH messages loaded by default for all subscripts.
@@ -1116,17 +1670,17 @@
 				this.$dialog.dialog( {
 					width: 500,
 					autoOpen: false,
-					title: 'AFCH Preferences',
+					title: 'AFCH参数设置',
 					modal: true,
 					buttons: [
 						{
-							text: 'Cancel',
+							text: '取消',
 							click: function () {
 								prefs.$dialog.dialog( 'close' );
 							}
 						},
 						{
-							text: 'Save preferences',
+							text: '保存设置',
 							click: function () {
 								prefs.save();
 								prefs.$dialog.empty().append( $spinner );
@@ -1193,8 +1747,8 @@
 				AFCH.userData.set( 'preferences', this.prefStore ).done( function () {
 					// When we're done, close the dialog and notify the user
 					prefs.$dialog.dialog( 'close' );
-					mw.notify( 'AFCH: Preferences saved successfully! They will take effect when the current page is ' +
-						'reloaded or when you browse to another page.' );
+					mw.notify( 'AFCH: 参数设置项保存成功！ 它们将在当前页面生效 ' +
+						'或浏览其他页面时重新加载。' );
 				} );
 			};
 
@@ -1206,7 +1760,7 @@
 			 */
 			this.initLink = function ( $element, linkText ) {
 				$( '<span>' )
-					.text( linkText || 'Update preferences' )
+					.text( linkText || '更新设置' )
 					.addClass( 'preferences-link link' )
 					.appendTo( $element )
 					.click( function () {
@@ -1469,29 +2023,29 @@
 
 			if ( elapsed < msPerMinute ) {
 				amount = Math.round( elapsed / 1000 );
-				unit = 'second';
+				unit = '秒';
 			} else if ( elapsed < msPerHour ) {
 				amount = Math.round( elapsed / msPerMinute );
-				unit = 'minute';
+				unit = '分钟';
 			} else if ( elapsed < msPerDay ) {
 				amount = Math.round( elapsed / msPerHour );
-				unit = 'hour';
+				unit = '小时';
 			} else if ( elapsed < msPerMonth ) {
 				amount = Math.round( elapsed / msPerDay );
-				unit = 'day';
+				unit = '天';
 			} else if ( elapsed < msPerYear ) {
 				amount = Math.round( elapsed / msPerMonth );
-				unit = 'month';
+				unit = '月';
 			} else {
 				amount = Math.round( elapsed / msPerYear );
-				unit = 'year';
+				unit = '年';
 			}
 
 			if ( amount !== 1 ) {
-				unit += 's';
+				unit += ' ';
 			}
 
-			return [ amount, unit, 'ago' ].join( ' ' );
+			return [ amount, unit, '之前' ].join( ' ' );
 		},
 
 		/**
@@ -1543,7 +2097,7 @@
 			var exp, match, date;
 
 			exp = new RegExp( '(\\d{1,2}):(\\d{2}), (\\d{1,2}) ' +
-				'(January|February|March|April|May|June|July|August|September|October|November|December) ' +
+				'(1月|2月|3月|4月|5月|6月|7月|8月|9月|10月|11月|12月) ' +
 				'(\\d{4}) \\(UTC\\)', 'g' );
 
 			match = exp.exec( string );
@@ -1631,7 +2185,7 @@
 		getReason: function ( code ) {
 			var deferred = $.Deferred();
 
-			$.post( 'https://en.wikipedia.org/api/rest_v1/transform/wikitext/to/html',
+			$.post( 'https://zh.wikipedia.org/api/rest_v1/transform/wikitext/to/html',
 				'wikitext={{AFC submission/comments|' + code + '}}&body_only=true',
 				function ( data ) {
 					deferred.resolve( data );

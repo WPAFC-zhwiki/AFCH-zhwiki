@@ -1,3 +1,4 @@
+/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
 //<nowiki>
 ( function ( $, mw ) {
 	var subscriptToLoad = false,
@@ -12,8 +13,8 @@
 			// `submissions.js` is for reviewing textual
 			// Articles for Creation submissions.
 			submissions: [
-				'Wikipedia:Articles for creation/',
-				'Wikipedia talk:Articles for creation/',
+				'Wikipedia:建立條目專題/',
+				'Wikipedia talk:建立條目專題/',
 				'User:',
 				'Draft:'
 			]
@@ -47,13 +48,13 @@
 
 		AFCH.consts.scriptpath = mw.config.get( 'wgServer' ) + mw.config.get( 'wgScript' );
 		AFCH.consts.baseurl = AFCH.consts.scriptpath +
-			'?action=raw&ctype=text/javascript&title=MediaWiki:Gadget-afch.js';
+			'?action=raw&ctype=text/javascript&title=User:94rain/js/afch-master.js';
 
 		$.getScript( AFCH.consts.baseurl + '/core.js' ).done( function () {
 			var loaded = AFCH.load( subscriptToLoad );
 			if ( !loaded ) {
-				mw.notify( 'AFCH could not be loaded: ' + ( AFCH.error || 'unknown error' ),
-					{ title: 'AFCH error' } );
+				mw.notify( 'AFCH无法加载：' + ( AFCH.error || '未知错误' ),
+					{ title: 'AFCH错误' } );
 			}
 		} );
 	}
