@@ -38,7 +38,7 @@ if len(sys.argv) < 2:
 # Shortname of the wiki target
 wiki = sys.argv[1]
 
-if wiki not in ('en', 'test'):
+if wiki not in ('zh', 'test'):
 	print('Error: unrecognized wiki "{}". Must be "en" or "test".'.format(wiki))
 	sys.exit(0)
 

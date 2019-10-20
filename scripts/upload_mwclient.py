@@ -67,12 +67,12 @@ except OSError:
 
 print 'Uploading to {}...'.format(wiki)
 
-if wiki == 'enwiki':
-	site = mwclient.Site('en.wikipedia.org')
+if wiki == 'zhwiki':
+	site = mwclient.Site('zh.wikipedia.org')
 elif wiki == 'testwiki':
 	site = mwclient.Site('test.wikipedia.org')
 else:
-	print 'Error: unrecognized wiki "{}". Must be "enwiki" or "testwiki".'.format(wiki)
+	print 'Error: unrecognized wiki "{}". Must be "zhwiki" or "testwiki".'.format(wiki)
 	sys.exit(0)
 
 # Login with username and password
@@ -92,7 +92,7 @@ except AttributeError:
 	sha1 = branch.commit.id
 
 # Prepend this to every page
-header = '/* Uploaded from https://github.com/WPAFC/afch-rewrite, commit: {} ({}) */\n'.format(sha1, branch)
+header = '/* Uploaded from https://github.com/94rain/afch-zhwp, commit: {} ({}) */\n'.format(sha1, branch)
 
 def uploadFile(pagename, content):
 	page = site.Pages[pagename]

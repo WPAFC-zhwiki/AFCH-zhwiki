@@ -1,4 +1,4 @@
-/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
+﻿/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
 //<nowiki>
 ( function ( AFCH, $, mw ) {
 	var $afchLaunchLink, $afch, $afchWrapper,
@@ -597,8 +597,6 @@
 		this.text = this.text.replace( new RegExp( '\\{\\{\\s*afc submission\\s*(?:\\||[^{{}}]*|{{.*?}})*?\\}\\}' +
 			// Also remove the AFCH-generated warning message, since if necessary the script will add it again
 			'(<!-- 请不要移除这一行代码 -->)?', 'gi' ), '' );
-
-		// Nastiest hack of all time. As above, Parsoid would be great. Gotta wire it up asynchronously first, though.
 		this.text = this.text.replace( /\{\{\s*afc comment.+?\(UTC\)\}\}/gi, '' );
 
 		// Remove horizontal rules that were added by AFCH after the comments
@@ -905,7 +903,7 @@
 
 				// Uneven (/unclosed) <ref> and </ref> tags
 				if ( refBeginMatches.length !== refEndMatches.length ) {
-					addWarning( '页面包含未闭合的' +
+					addWarning( '页面包含未闭合的 ' +
 						( refBeginMatches.length > refEndMatches.length ? '未闭合的' : '不平衡的' ) + '<ref>标签。' );
 				}
 
@@ -942,7 +940,7 @@
 
 				// <ref> without {{reflist}}
 				if ( refBeginMatches.length && !hasReflist ) {
-					addWarning( '页面中包含<ref>标签，但是没有{\{reflist}}，您也许不能看到全部的来源' );
+					addWarning( '页面中包含<ref>标签，但是没有{{reflist}}，您也许不能看到全部的来源' );
 				}
 
 				deferred.resolve();
@@ -1046,7 +1044,7 @@
 					oneComment = numberOfComments === 1;
 
 				if ( numberOfComments ) {
-					addWarning( '页面中包含超过' + ( oneComment ? '' : '多个' ) + '超过30字节的HTML注释' ) +
+					addWarning( '页面中包含超过' + ( oneComment ? '' : '多个' ) + '超过30字节的HTML注释' + ( oneComment ? '' : '' ) +
 						'', '(查看注释内容)' + ( oneComment ? '' : '' ), function () {
 						var $toggleLink = $( this ).addClass( 'long-comment-toggle' ),
 							$warningDiv = $( this ).parent(),
@@ -1064,7 +1062,7 @@
 
 						// Now change the "View comment" link to behave as a normal toggle for .long-comments
 						AFCH.makeToggle( '.long-comment-toggle', '.long-comments',
-							'(查看注释内容)' + ( oneComment ? '' : '' ), '(隐藏注释内容)' ) );
+							'(查看注释内容)' + ( oneComment ? '' : '' ), '(隐藏注释内容)' + ( oneComment ? '' : '' ) );
 
 						return false;
 					} );
@@ -1536,7 +1534,7 @@
 							$.each( data.query.pages[ '-1' ].protection, function ( _, entry ) {
 								if ( entry.type === 'create' && entry.level === 'sysop' &&
 									$.inArray( 'sysop', mw.config.get( 'wgUserGroups' ) ) === -1 ) {
-									errorHtml = 'Darn it, "' + linkToPage + '"已被白纸保护。在接受之前，您需要请求解除保护。';
+									errorHtml = 'Darn it, "' + linkToPage + '"已被白纸保护。 在接受之前，您需要请求解除保护。';
 									buttonText = '目标页面已被白纸保护';
 								}
 							} );
@@ -1975,7 +1973,7 @@
 					// (e.g. pages in `Draft:` namespace with discussion)
 					mode: 'prependtext',
 					contents: talkText + '\n\n',
-					summary: '放置[[Wikipedia:WPAFC|条目建立专题]]模板'
+					summary: '放置[[Wikipedia:WPAFC|专题]]模板'
 				} );
 
 				// NOTIFY SUBMITTER
@@ -2057,7 +2055,7 @@
 			newParams[ '3' ] = data.declineTextarea;
 		} else if ( declineReason2 === 'reason' ) {
 			newParams.details2 = data.declineTextarea;
-		} else if ( isDecline && data.declineTextarea ) {
+		} else if ( data.declineTextarea ) {
 
 			// But otherwise if addtional text has been entered we just add it as a new comment
 			afchSubmission.addNewComment( data.declineTextarea );
@@ -2075,7 +2073,7 @@
 		}
 
 		// If we're rejecting, any text in the text area is a comment
-		if ( !isDecline && data.rejectTextarea ) {
+		if ( data.rejectTextarea ) {
 			afchSubmission.addNewComment( data.rejectTextarea );
 		}
 
