@@ -489,7 +489,7 @@
 			commentRegex,
 			commentsToRemove = [
 				'请不要移除这一行代码',
-				'Carry on from here, and delete this comment.',
+				'請勿刪除此行，並由下一行開始編輯',
 				'Please leave this line alone!',
 				'Important, do not remove this line before (template|article) has been created.',
 				'Just press the "Save page" button below without changing anything! Doing so will submit your article submission for review. ' +
@@ -530,7 +530,7 @@
 		text = text.replace( /== Request review at \[\[WP:AFC\]\] ==/gi, '' );
 
 		// Remove sandbox templates
-		text = text.replace( /\{\{(userspacedraft|userspace draft|user sandbox|Please leave this line alone \(sandbox heading\))(?:\{\{[^{}]*\}\}|[^}{])*\}\}/ig, '' );
+		text = text.replace( /\{\{(userspacedraft|userspace draft|user sandbox|draft copyvio|Please leave this line alone \(sandbox heading\))(?:\{\{[^{}]*\}\}|[^}{])*\}\}/ig, '' );
 
 		// Remove html comments (<!--) that surround categories
 		text = text.replace( /<!--\s*((\[\[:{0,1}(Category:.*?)\]\]\s*)+)-->/gi, '$1' );
