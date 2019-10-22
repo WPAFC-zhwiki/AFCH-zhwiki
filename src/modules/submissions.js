@@ -316,10 +316,10 @@
 	};
 
 	/**
-	 * Checks if submission is G13 eligible
+	 * Checks if submission is O7 eligible
 	 * @return {$.Deferred} Resolves to bool if submission is eligible
 	 */
-	AFCH.Submission.prototype.isG13Eligible = function () {
+	AFCH.Submission.prototype.isO7Eligible = function () {
 		var deferred = $.Deferred();
 
 		// Submission must not currently be submitted
@@ -504,8 +504,8 @@
 			text = text.replace( /\[\[:Category:/gi, '[[Category:' );
 			text = text.replace( /\{\{(tl|tlx|tlg)\|(.*?)\}\}/ig, '{{$2}}' );
 
-			// Strip the AFC G13 postponement template
-			text = text.replace( /\{\{AfC postpone G13(?:\|\d*)?\}\}\n*/gi, '' );
+			// Strip the AFC O7 postponement template
+			text = text.replace( /\{\{AfC postpone O7(?:\|\d*)?\}\}\n*/gi, '' );
 
 			// Add to the list of comments to remove
 			$.merge( commentsToRemove, [
@@ -832,12 +832,12 @@
 				}
 			} );
 
-			// Get G13 eligibility and when known, display relevant buttons...
+			// Get O7 eligibility and when known, display relevant buttons...
 			// but don't hold up the rest of the loading to do so
-			submission.isG13Eligible().done( function ( eligible ) {
-				$afch.find( '.g13-related' ).toggleClass( 'hidden', !eligible );
-				$afch.find( '#afchG13' ).click( function () { handleG13(); } );
-				$afch.find( '#afchPostponeG13' ).click( function () { spinnerAndRun( showPostponeG13Options ); } );
+			submission.isO7Eligible().done( function ( eligible ) {
+				$afch.find( '.o7-related' ).toggleClass( 'hidden', !eligible );
+				$afch.find( '#afchO7' ).click( function () { handleO7(); } );
+				$afch.find( '#afchPostponeO7' ).click( function () { spinnerAndRun( showPostponeO7Options ); } );
 			} );
 		} );
 	}
@@ -1122,7 +1122,7 @@
 			'comment-on-submission': '{{subst:AFC notification|comment|article=$1}}',
 
 			// $1 = article name
-			'g13-submission': '{{subst:Db-afc-notice|$1}} ~~' + '~~',
+			'o7-submission': '{{subst:Db-afc-notice|$1}} ~~' + '~~',
 
 			'teahouse-invite': '{{subst:Wikipedia:Teahouse/AFC invitation|sign=~~' + '~~}}'
 		} );
@@ -1316,7 +1316,7 @@
 						try {
 							window.localStorage[ lsKey ] = JSON.stringify( wikiProjects );
 						} catch ( e ) {
-							AFCH.log( 'Unable to cache WikiProject list: ' + e.message );
+                            AFCH.log( '无法缓存维基专题列表：' + e.message );
 						}
 					}
 
@@ -1367,10 +1367,10 @@
 					if ( $noResults.length ) {
 						$( '<div>' )
 							.appendTo( $noResults.empty() )
-							.text( 'Whoops, no WikiProjects matched in database! ' )
+                            .text( '糟糕，数据库中没有匹配的维基专题！' )
 							.append(
 								$( '<a>' )
-									.text( 'Click to manually add {{' + newProject + '}} to the page\'s WikiProject list.' )
+                                .text( '点击手动添加{{' + newProject + '}}至讨论页' )
 									.click( function () {
 										var $wikiprojects = $afch.find( '#newWikiProjects' );
 
@@ -1698,11 +1698,11 @@
 						},
 
 						exists: function ( pos ) {
-							updateTextfield( '已存在条目的标题', 'Chocolate chip cookie', candidateDupeName, pos );
+                            updateTextfield('已存在条目的标题', '巧克力曲奇', candidateDupeName, pos );
 						},
 
 						plot: function ( pos ) {
-							updateTextfield( 'Title of existing related article, if one exists', 'Charlie and the Chocolate Factory', candidateDupeName, pos );
+                            updateTextfield('已有相关条目的标题（如果存在）', '查理和巧克力工厂', candidateDupeName, pos );
 						},
 
 						// Custom decline rationale
@@ -1882,9 +1882,9 @@
 		addFormSubmitHandler( handleSubmit );
 	}
 
-	function showPostponeG13Options() {
-		loadView( 'postpone-g13', {} );
-		addFormSubmitHandler( handlePostponeG13 );
+	function showPostponeO7Options() {
+		loadView( 'postpone-o7', {} );
+		addFormSubmitHandler( handlePostponeO7 );
 	}
 
 	// These functions actually perform a given action using data passed
@@ -2324,13 +2324,13 @@
 		} );
 	}
 
-	function handleG13() {
+	function handleO7() {
 		// We start getting the creator now (for notification later) because ajax is
 		// radical and handles simultaneous requests, but we don't let it delay tagging
 		var gotCreator = afchPage.getCreator();
 
 		// Update the display
-		prepareForProcessing( 'Requesting', 'g13' );
+		prepareForProcessing( 'Requesting', 'o7' );
 
 		// Get the page text and the last modified date (cached!) and tag the page
 		$.when(
@@ -2340,13 +2340,12 @@
 			var text = new AFCH.Text( rawText );
 
 			// Add the deletion tag and clean up for good measure
-			text.prepend( '{{db-g13|ts=' + AFCH.dateToMwTimestamp( lastModified ) + '}}\n' );
+			text.prepend( '{{delete|O7' + '}}\n' );
 			text.cleanUp();
 
 			afchPage.edit( {
 				contents: text.get(),
-				summary: 'Tagging abandoned [[Wikipedia:Articles for creation|Articles for creation]] draft ' +
-					'for speedy deletion under [[WP:G13|G13]]'
+                summary: '请求快速删除（[[WP:O7|CSD O7]]: 废弃草稿）'
 			} );
 
 			// Now notify the page creator as well as any and all previous submitters
@@ -2362,9 +2361,9 @@
 
 				$.each( usersToNotify, function ( _, user ) {
 					AFCH.actions.notifyUser( user, {
-						message: AFCH.msg.get( 'g13-submission',
+						message: AFCH.msg.get( 'o7-submission',
 							{ $1: AFCH.consts.pagename } ),
-						summary: 'Notification: [[WP:G13|G13]] speedy deletion nomination of [[' + AFCH.consts.pagename + ']]'
+                        summary: '通知：[[' + AFCH.consts.pagename + ']]的快速删除提名（[[WP:O7|CSD O7]]）'
 					} );
 				} );
 
@@ -2378,23 +2377,23 @@
 		} );
 	}
 
-	function handlePostponeG13( data ) {
+	function handlePostponeO7( data ) {
 		var postponeCode,
 			text = data.afchText,
 			rawText = text.get(),
-			postponeRegex = /\{\{AfC postpone G13\s*(?:\|\s*(\d*)\s*)?\}\}/ig;
+			postponeRegex = /\{\{AfC postpone O7\s*(?:\|\s*(\d*)\s*)?\}\}/ig;
 		match = postponeRegex.exec( rawText );
 
 		// First add the postpone template
 		if ( match ) {
 			if ( match[ 1 ] !== undefined ) {
-				postponeCode = '{{AfC postpone G13|' + ( parseInt( match[ 1 ] ) + 1 ) + '}}';
+				postponeCode = '{{AfC postpone O7|' + ( parseInt( match[ 1 ] ) + 1 ) + '}}';
 			} else {
-				postponeCode = '{{AfC postpone G13|2}}';
+				postponeCode = '{{AfC postpone O7|2}}';
 			}
 			rawText = rawText.replace( match[ 0 ], postponeCode );
 		} else {
-			rawText += '\n{{AfC postpone G13|1}}';
+			rawText += '\n{{AfC postpone O7|1}}';
 		}
 
 		text.set( rawText );
