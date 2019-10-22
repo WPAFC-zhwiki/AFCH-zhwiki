@@ -1017,7 +1017,7 @@
 				if ( isOwnReview ) {
 					reviewer = '您';
 				} else {
-					reviewer = afchSubmission.params.reviewer || '其它人';
+					reviewer = afchSubmission.params.reviewer || '其他人';
 				}
 
 				addWarning( reviewer + ( afchSubmission.params.reviewts ?
@@ -1044,7 +1044,7 @@
 					oneComment = numberOfComments === 1;
 
 				if ( numberOfComments ) {
-					addWarning( '页面中包含超过' + ( oneComment ? '' : '多个' ) + '超过30字节的HTML注释' + ( oneComment ? '' : '' ) +
+					addWarning( '页面中包含' + ( oneComment ? '' : '多个' ) + '超过30字节的HTML注释' + ( oneComment ? '' : '' ) +
 						'', '(查看注释内容)' + ( oneComment ? '' : '' ), function () {
 						var $toggleLink = $( this ).addClass( 'long-comment-toggle' ),
 							$warningDiv = $( this ).parent(),
