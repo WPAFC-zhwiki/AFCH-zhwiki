@@ -1339,7 +1339,7 @@
 				categories: categories,
 				// Only offer to patrol the page if not already patrolled (in other words, if
 				// the "Mark as patrolled" link can be found in the DOM)
-				showPatrolOption: !!$afch.find( '.patrollink' ).length
+				showPatrolOption: !!document.getElementsByClassName("patrollink").length
 			}, function () {
 				$afch.find( '#newAssessment' ).chosen( {
 					allow_single_deselect: true,
