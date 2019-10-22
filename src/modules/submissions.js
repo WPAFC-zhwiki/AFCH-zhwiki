@@ -2154,8 +2154,7 @@
 					userTalk.getCategories( /* useApi */ true ).done( function ( categories ) {
 						var hasTeahouseCat = false,
 							teahouseCategories = [
-								'Category:Wikipedians who have received a Teahouse invitation',
-								'Category:Wikipedians who have received a Teahouse invitation through AfC'
+								'Category:收到过建立条目专题求助邀请的维基人'
 							];
 
 						$.each( categories, function ( _, cat ) {
