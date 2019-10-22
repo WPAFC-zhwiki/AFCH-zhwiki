@@ -903,7 +903,7 @@
 
 				// Uneven (/unclosed) <ref> and </ref> tags
 				if ( refBeginMatches.length !== refEndMatches.length ) {
-					addWarning( '页面包含未闭合的 ' +
+					addWarning( '页面包含未闭合的' +
 						( refBeginMatches.length > refEndMatches.length ? '未闭合的' : '不平衡的' ) + '<ref>标签。' );
 				}
 
@@ -1534,7 +1534,7 @@
 							$.each( data.query.pages[ '-1' ].protection, function ( _, entry ) {
 								if ( entry.type === 'create' && entry.level === 'sysop' &&
 									$.inArray( 'sysop', mw.config.get( 'wgUserGroups' ) ) === -1 ) {
-									errorHtml = 'Darn it, "' + linkToPage + '"已被白纸保护。 在接受之前，您需要请求解除保护。';
+									errorHtml = 'Darn it, "' + linkToPage + '"已被白纸保护。在接受之前，您需要请求解除保护。';
 									buttonText = '目标页面已被白纸保护';
 								}
 							} );
@@ -1973,7 +1973,7 @@
 					// (e.g. pages in `Draft:` namespace with discussion)
 					mode: 'prependtext',
 					contents: talkText + '\n\n',
-					summary: '放置[[Wikipedia:WPAFC|专题]]模板'
+					summary: '放置[[Wikipedia:WPAFC|条目建立专题]]模板'
 				} );
 
 				// NOTIFY SUBMITTER
@@ -2055,7 +2055,7 @@
 			newParams[ '3' ] = data.declineTextarea;
 		} else if ( declineReason2 === 'reason' ) {
 			newParams.details2 = data.declineTextarea;
-		} else if ( data.declineTextarea ) {
+		} else if ( isDecline && data.declineTextarea ) {
 
 			// But otherwise if addtional text has been entered we just add it as a new comment
 			afchSubmission.addNewComment( data.declineTextarea );
@@ -2073,7 +2073,7 @@
 		}
 
 		// If we're rejecting, any text in the text area is a comment
-		if ( data.rejectTextarea ) {
+		if ( !isDecline && data.rejectTextarea ) {
 			afchSubmission.addNewComment( data.rejectTextarea );
 		}
 
