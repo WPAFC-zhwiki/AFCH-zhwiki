@@ -1,4 +1,4 @@
-/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
+﻿/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
 
 var Hogan = {};
 
@@ -684,8 +684,7 @@ var Hogan = {};
 										action: 'options',
 										change: 'gadget-afchelper=0'
 									} ).done( function ( data ) {
-										mw.notify( 'AFCH has been disabled successfully. If you wish to re-enable it in the ' +
-											'future, you can do so via your Preferences by checking "Yet Another AFC Helper Script".' );
+										mw.notify( 'AFCH已被成功禁用。' );
 									} );
 								} )
 							)

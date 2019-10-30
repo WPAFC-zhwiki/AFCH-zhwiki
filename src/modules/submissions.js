@@ -1162,7 +1162,7 @@
 
 		// Update the button show the `running` text
 		$submitBtn
-			.text( $submitBtn.data( 'running' ) )
+			.text( $submitBtn.data( '运行中' ) )
 			.addClass( 'disabled' )
 			.off( 'click' );
 
@@ -1805,7 +1805,7 @@
 		$.each( afchSubmission.submitters, function ( index, submitter ) {
 			customSubmitters.push( {
 				name: submitter,
-				description: submitter + ( index === 0 ? ' (most recent submitter)' : ' (past submitter)' ),
+				description: submitter + ( index === 0 ? ' (最近的提交者)' : ' (过去的提交者)' ),
 				selected: index === 0
 			} );
 		} );
@@ -1820,7 +1820,7 @@
 				$afch.find( '#submitterNameStatus' ).text( '' );
 				$afch.find( '#afchSubmitForm' )
 					.removeClass( 'disabled' )
-					.text( 'Submit' );
+					.text( '提交' );
 			}
 
 			// Show the other textbox when `other` is selected in the menu
@@ -1900,7 +1900,7 @@
 				var $patrolLink,
 					newPage = new AFCH.Page( moveData.to ),
 					talkPage = newPage.getTalkPage(),
-					recentPage = new AFCH.Page( 'Wikipedia:建立條目專題/近期创建' ),
+					recentPage = new AFCH.Page( 'Wikipedia:建立條目專題/近期創建' ),
 					talkText = '';
 
 				// ARTICLE
