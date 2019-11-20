@@ -53,8 +53,8 @@
 		$.getScript( AFCH.consts.baseurl + '/core.js' ).done( function () {
 			var loaded = AFCH.load( subscriptToLoad );
 			if ( !loaded ) {
-				mw.notify( 'AFCH无法加载：' + ( AFCH.error || '未知错误' ),
-					{ title: 'AFCH错误' } );
+				mw.notify( wgULS('AFCH无法加载：','ARCH無法加載：') + ( AFCH.error || wgULS('未知错误','未知錯誤') ),
+					{ title: wgULS('AFCH错误','AFCH錯誤') } );
 			}
 		} );
 	}

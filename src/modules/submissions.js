@@ -1973,7 +1973,7 @@
 					// (e.g. pages in `Draft:` namespace with discussion)
 					mode: 'prependtext',
 					contents: talkText + '\n\n',
-					summary: '放置[[Wikipedia:WPAFC|条目建立专题]]模板'
+					summary: wgULS('放置[[Wikipedia:WPAFC|条目建立专题]]模板','放置[[Wikipedia:WPAFC|條目建立專題]]模板')
 				} );
 
 				// NOTIFY SUBMITTER
@@ -2111,7 +2111,7 @@
 		text.cleanUp();
 
 		// Build edit summary
-		var editSummary = ( isDecline ? '仍需改善' : '拒绝再次提交' ) + '的草稿: ',
+		var editSummary = ( isDecline ? '仍需改善' : wgULS('拒绝再次提交','拒絕再次提交') ) + '的草稿: ',
 			lengthLimit = declineReason2 ? 120 : 180;
 		if ( declineReason === 'reason' ) {
 
@@ -2231,7 +2231,7 @@
 
 		afchPage.edit( {
 			contents: text.get(),
-			summary: '点评草稿'
+			summary: wgULS('点评草稿','點評草稿')
 		} );
 
 		if ( data.notifyUser ) {
@@ -2239,7 +2239,7 @@
 				AFCH.actions.notifyUser( submitter, {
 					message: AFCH.msg.get( 'comment-on-submission',
 						{ $1: AFCH.consts.pagename } ),
-					summary: '通知：对草稿[[' + AFCH.consts.pagename + ']]进行点评'
+					summary: '通知：对草稿[[' + AFCH.consts.pagename + wgULS(']]进行点评',']]進行點評')
 				} );
 			} );
 		}
@@ -2292,7 +2292,7 @@
 
 			afchPage.edit( {
 				contents: text.get(),
-				summary: '注释分类、清理多余模板'
+				summary: wgULS('维护清理','維護清理')
 			} );
 		} );
 	}
@@ -2319,7 +2319,7 @@
 
 			afchPage.edit( {
 				contents: text.get(),
-				summary: actionText + ' 标记为正在审阅'
+				summary: actionText + wgULS('标记为正在审阅','標記為正在審閱')
 			} );
 		} );
 	}

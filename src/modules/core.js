@@ -673,9 +673,9 @@ var Hogan = {};
 					// If we can detect that the gadget is currently enabled, offer a one-click "disable" link
 					if ( mw.user.options.get( 'gadget-afchelper' ) === '1' ) {
 						$howToDisable = $( '<span>' )
-							.append( '如果要禁用帮助程序脚本， ' )
+							.append( wgULS('如果要禁用辅助脚本，', '如果要禁用輔助腳本，') )
 							.append( $( '<a>' )
-								.text( '点击这里' )
+								.text( wgULS('点击这里','點擊這裡') )
 								.click( function () {
 									// Submit the API request to disable the gadget.
 									// Note: We don't use `AFCH.api` here, because AFCH has already been
@@ -693,26 +693,26 @@ var Hogan = {};
 					// Otherwise, AFCH is probably installed via common.js/skin.js -- offer links for easy access.
 					} else {
 						$howToDisable = $( '<span>' )
-							.append( '如果要禁用帮助程序脚本，则需要手动' +
-								'从你的' )
+							.append( wgULS('如果要禁用帮助程序脚本，则需要手动','如果要禁用幫助程序腳本，則需要手動') +
+								wgULS('从你的','從你的') )
 							.append( AFCH.makeLinkElementToPage( 'Special:MyPage/common.js', 'common.js' ) )
 							.append( '或' )
 							.append( AFCH.makeLinkElementToPage( 'Special:MyPage/skin.js', 'skin.js' ) )
-							.append( '页面中移除。' );
+							.append( wgULS('页面中移除。','頁面中移除。') );
 					}
 
 					// Finally, make and push the notification, then explode AFCH
 					mw.notify(
 						$( '<div>' )
-							.append( 'AFCH 不能加载，"' + user + '"没有列在' )
+							.append( wgULS('AFCH不能加载，"','AFCH不能加載，"') + user + wgULS('"没有列在','"沒有列在') )
 							.append( AFCH.makeLinkElementToPage( whitelist.rawTitle ) )
-							.append( '。您可以在那里申请使用AFC辅助脚本的权限。' )
+							.append( wgULS('。您可以在那里申请使用AFC辅助脚本的权限。','。您可以在那裡申請使用AFC輔助腳本的權限。') )
 							.append( $howToDisable )
-							.append( '如果您有任何问题或疑虑，请在' )
-							.append( AFCH.makeLinkElementToPage( 'WT:AFCH', '寻求帮助' ) )
+							.append( wgULS('如果您有任何问题或疑虑，请在','如果您有任何問題或疑慮，請在') )
+							.append( AFCH.makeLinkElementToPage( 'WT:AFCH', wgULS('寻求帮助','尋求幫助') ) )
 							.append( '!' ),
 						{
-							title: 'AFCH错误：用户不在允许列表中',
+							title: wgULS('AFCH错误：用户不在允许列表中','AFCH錯誤：用戶不在允許列表中'),
 							autoHide: false
 						}
 					);
@@ -770,7 +770,7 @@ var Hogan = {};
 				bugsListLink: 'https://zh.wikipedia.org/w/index.php?title=Wikipedia_talk:建立條目專題/協助腳本'
 			} );
 			$( '<span>' )
-				.text( linkText || '提供反馈！' )
+				.text( linkText || wgULS('提供反馈！','提供反饋！') )
 				.addClass( 'feedback-link link' )
 				.click( function () {
 					feedback.launch( {
@@ -1073,7 +1073,7 @@ var Hogan = {};
 					deferred = $.Deferred();
 
 				if ( !options.hide ) {
-					status = new AFCH.status.Element( 'Getting $1...',
+					status = new AFCH.status.Element( '获取$1...',
 						{ $1: AFCH.makeLinkElementToPage( pagename ) } );
 				} else {
 					status = AFCH.consts.nullstatus;
@@ -1106,11 +1106,11 @@ var Hogan = {};
 
 							rev = data.query.pages[ id ].revisions[ 0 ];
 							deferred.resolve( rev[ '*' ], rev );
-							status.update( 'Got $1' );
+							status.update( '已获取$1' );
 						} else {
 							deferred.reject( data );
 							// FIXME: get detailed error info from API result
-							status.update( 'Error getting $1: ' + JSON.stringify( data ) );
+							status.update( '获取$1失败: ' + JSON.stringify( data ) );
 						}
 					} )
 					.fail( function ( err ) {
@@ -1174,25 +1174,25 @@ var Hogan = {};
 							deferred.resolve( data );
 
 							if ( data.edit.hasOwnProperty( 'nochange' ) ) {
-								status.update( '没有对$1作出任何更改' );
+								status.update( wgULS('没有对$1作出任何更改','沒有對$1作出任何更改') );
 								return;
 							}
 
 							// Create a link to the diff of the edit
 							$diffLink = AFCH.makeLinkElementToPage(
-								'Special:Diff/' + data.edit.oldrevid + '/' + data.edit.newrevid, '(差异)'
+								'Special:Diff/' + data.edit.oldrevid + '/' + data.edit.newrevid, wgULS('(差异)','(差異)')
 							).addClass( 'text-smaller' );
 
 							status.update( '已保存$1的更改' + AFCH.jQueryToHtml( $diffLink ) );
 						} else {
 							deferred.reject( data );
 							// FIXME: get detailed error info from API result??
-							status.update( '保存$1的更改失败：' + JSON.stringify( data ) );
+							status.update( wgULS('保存$1的更改失败：','保存$1的更改失敗：') + JSON.stringify( data ) );
 						}
 					} )
 					.fail( function ( err ) {
 						deferred.reject( err );
-						status.update( '保存$1的更改失败：' + JSON.stringify( err ) );
+						status.update( wgULS('保存$1的更改失败：','保存$1的更改失敗：') + JSON.stringify( err ) );
 					} );
 
 				return deferred;
@@ -1222,7 +1222,7 @@ var Hogan = {};
 				var status, request, deferred = $.Deferred();
 
 				if ( !hide ) {
-					status = new AFCH.status.Element( '正在移动$1至$2...', {
+					status = new AFCH.status.Element( wgULS('正在移动$1至$2...','正在移動$1至$2...'), {
 						$1: AFCH.makeLinkElementToPage( oldTitle ),
 						$2: AFCH.makeLinkElementToPage( newTitle )
 					} );
@@ -1246,16 +1246,16 @@ var Hogan = {};
 				AFCH.api.postWithToken( 'edit', request ) // Move token === edit token
 					.done( function ( data ) {
 						if ( data && data.move ) {
-							status.update( '移动$1至$2' );
+							status.update( wgULS('移动$1至$2','移動$1至$2') );
 							deferred.resolve( data.move );
 						} else {
 							// FIXME: get detailed error info from API result??
-							status.update( '移动$1至$2失败：' + JSON.stringify( data.error ) );
+							status.update( wgULS('移动$1至$2失败：','移動$1至$2失敗：') + JSON.stringify( data.error ) );
 							deferred.reject( data.error );
 						}
 					} )
 					.fail( function ( err ) {
-						status.update( '移动$1至$2失败：' + JSON.stringify( err ) );
+						status.update( wgULS('移动$1至$2失败：','移動$1至$2失敗：') + JSON.stringify( err ) );
 						deferred.reject( err );
 					} );
 
@@ -1346,8 +1346,8 @@ var Hogan = {};
 					logPage.edit( {
 						contents: appendText,
 						mode: 'appendtext',
-						summary: '记录对[[' + options.title + ']]的快速删除提名',
-						statusText: '记录快速删除提名'
+						summary: wgULS('记录对[[','記錄對[[') + options.title + ']]的快速删除提名',
+						statusText: wgULS('记录快速删除提名','記錄快速刪除提名')
 					} ).done( function ( data ) {
 						deferred.resolve( data );
 					} ).fail( function ( data ) {
@@ -1367,7 +1367,7 @@ var Hogan = {};
 			 */
 			patrolRcid: function ( rcid, title ) {
 				var request, deferred = $.Deferred(),
-					status = new AFCH.status.Element( '正在将$1标记为已巡查...',
+					status = new AFCH.status.Element( wgULS('正在将$1标记为已巡查...','正在將$1標記為已巡查...'),
 						{ $1: AFCH.makeLinkElementToPage( title ) || 'page with id #' + rcid } );
 
 				request = {
@@ -1383,14 +1383,14 @@ var Hogan = {};
 
 				AFCH.api.postWithToken( 'patrol', request ).done( function ( data ) {
 					if ( data.patrol && data.patrol.rcid ) {
-						status.update( 'Patrolled $1' );
+						status.update( '已巡查$1' );
 						deferred.resolve( data );
 					} else {
-						status.update( '将$1标记为已巡查失败：' + JSON.stringify( data.patrol ) );
+						status.update( wgULS('将$1标记为已巡查失败：','將$1標記為已巡查失敗：') + JSON.stringify( data.patrol ) );
 						deferred.reject( data );
 					}
 				} ).fail( function ( data ) {
-					status.update( '将$1标记为已巡查失败：' + JSON.stringify( data ) );
+					status.update( wgULS('将$1标记为已巡查失败：','將$1標記為已巡查失敗：') + JSON.stringify( data ) );
 					deferred.reject( data );
 				} );
 
@@ -1669,7 +1669,7 @@ var Hogan = {};
 				this.$dialog.dialog( {
 					width: 500,
 					autoOpen: false,
-					title: 'AFCH参数设置',
+					title: wgULS('AFCH参数设置','AFCH偏好設定'),
 					modal: true,
 					buttons: [
 						{
@@ -1679,7 +1679,7 @@ var Hogan = {};
 							}
 						},
 						{
-							text: '保存设置',
+							text: wgULS('保存设置','保存設置'),
 							click: function () {
 								prefs.save();
 								prefs.$dialog.empty().append( $spinner );
@@ -1746,8 +1746,7 @@ var Hogan = {};
 				AFCH.userData.set( 'preferences', this.prefStore ).done( function () {
 					// When we're done, close the dialog and notify the user
 					prefs.$dialog.dialog( 'close' );
-					mw.notify( 'AFCH: 参数设置项保存成功！ 它们将在当前页面生效 ' +
-						'或浏览其他页面时重新加载。' );
+					mw.notify( wgULS('AFCH: 参数设置项保存成功！它们将在当前页面重新加载或浏览其他页面时生效。','AFCH: 偏好設定項保存成功！它們將在當前頁面重新加載或瀏覽其他頁面時生效。') );
 				} );
 			};
 
@@ -1759,7 +1758,7 @@ var Hogan = {};
 			 */
 			this.initLink = function ( $element, linkText ) {
 				$( '<span>' )
-					.text( linkText || '更新设置' )
+					.text( linkText || wgULS('更新设置','更新設置') )
 					.addClass( 'preferences-link link' )
 					.appendTo( $element )
 					.click( function () {
@@ -2025,10 +2024,10 @@ var Hogan = {};
 				unit = '秒';
 			} else if ( elapsed < msPerHour ) {
 				amount = Math.round( elapsed / msPerMinute );
-				unit = '分钟';
+				unit = wgULS('分钟','分钟');
 			} else if ( elapsed < msPerDay ) {
 				amount = Math.round( elapsed / msPerHour );
-				unit = '小时';
+				unit = wgULS('小时','小時');
 			} else if ( elapsed < msPerMonth ) {
 				amount = Math.round( elapsed / msPerDay );
 				unit = '天';
