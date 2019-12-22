@@ -1,5 +1,16 @@
-﻿/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
+/* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
 //<nowiki>
+window.wgUXSv2 = function (wg, hant, tw) {
+    var ret = {
+        'zh-hant': hant || hk || mo,
+        'zh-tw': tw ,
+    }
+    return ret[wg]|| hant || tw ; 
+}
+
+window.wgULSv2 = function (hant, tw) {
+    return wgUXSv2(mw.config.get('wgUserLanguage'),hant, tw);
+};
 ( function ( AFCH, $, mw ) {
 	var $afchLaunchLink, $afch, $afchWrapper,
 		afchPage, afchSubmission, afchViews, afchViewer;
@@ -700,7 +711,7 @@
 						// Back link appears on the left based on context
 						$( '<div>' )
 							.addClass( 'back-link' )
-							.html( '&#x25c0; 回到选项' ) // back arrow
+							.html(wgULS('&#x25c0; 回到选项','&#x25c0; 回到選項')) // back arrow
 							.attr( 'title', 'Go back' )
 							.addClass( 'hidden' )
 							.click( function () {
@@ -738,7 +749,7 @@
 					.append(
 						$( '<div>' )
 							.addClass( 'initial-header' )
-							.text( '加载AFCH...' )
+							.text( wgULS('正在载入AFCH...','正在載入AFCH...') )
 					)
 			);
 
@@ -809,8 +820,8 @@
 
 			// Add feedback and preferences links
 			// FIXME: Feedback temporarily disabled due to https://github.com/WPAFC/afch-rewrite/issues/71
-			// AFCH.initFeedback( $afch.find( 'span.feedback-wrapper' ), '[your topic here]', '反馈问题' );
-			AFCH.preferences.initLink( $afch.find( 'span.preferences-wrapper' ), '设置' );
+			// AFCH.initFeedback( $afch.find( 'span.feedback-wrapper' ), '[your topic here]', wgULS('反馈问题','反饋問題') );
+			AFCH.preferences.initLink( $afch.find( 'span.preferences-wrapper' ), wgULS('设置','設置') );
 
 			// Set up click handlers
 			$afch.find( '#afchAccept' ).click( function () { spinnerAndRun( showAcceptOptions ); } );
@@ -865,7 +876,7 @@
 			if ( actionMessage !== false ) {
 				$action = $( '<a>' )
 					.addClass( 'link' )
-					.text( actionMessage || '(编辑页面)' )
+					.text( actionMessage || wgULS('（编辑页面）','（編輯頁面）') )
 					.appendTo( $warning );
 
 				if ( typeof onAction === 'function' ) {
@@ -903,13 +914,13 @@
 
 				// Uneven (/unclosed) <ref> and </ref> tags
 				if ( refBeginMatches.length !== refEndMatches.length ) {
-					addWarning( '页面包含未闭合的' +
-						( refBeginMatches.length > refEndMatches.length ? '未闭合的' : '不平衡的' ) + '<ref>标签。' );
+					addWarning( wgULS('页面包含未闭合的','頁面包含未閉合的') +
+						( refBeginMatches.length > refEndMatches.length ? wgULS('未闭合的','未閉合的') : wgULS('不平衡的','不平衡的') ) + wgULS('<ref>标签。','<ref>標籤。') );
 				}
 
 				// <ref>1<ref> instead of <ref>1</ref> detection
 				if ( malformedRefs.length ) {
-					addWarning( '页面中包含格式错误的<ref>标记', '(查看详情)', function () {
+					addWarning( wgULS('页面中包含格式错误的<ref>标记','頁面中包含錯誤的<ref>標記'), wgULS('（查看详情）','（查看詳情）'), function () {
 						var $toggleLink = $( this ).addClass( 'malformed-refs-toggle' ),
 							$warningDiv = $( this ).parent();
 						$malformedRefWrapper = $( '<div>' )
@@ -925,7 +936,7 @@
 						} );
 
 						// Now change the "View details" link to behave as a normal toggle for .malformed-refs
-						AFCH.makeToggle( '.malformed-refs-toggle', '.malformed-refs', '(查看详情)', '(隐藏详情)' );
+						AFCH.makeToggle( '.malformed-refs-toggle', '.malformed-refs', wgULS('（查看详情）','（查看詳情）'), wgULS('(隐藏详情)','(隱藏詳情)') );
 
 						return false;
 					} );
@@ -934,13 +945,13 @@
 				// <ref> after {{reflist}}
 				if ( hasReflist ) {
 					if ( refBeginRe.test( text.substring( reflistRe.lastIndex ) ) ) {
-						addWarning( '<ref>标签在参考来源列表前，您也许不能看到全部的来源' );
+						addWarning( wgULS('有<ref>标签在参考来源列表前，您可能无法看到全部的来源','有<ref>標籤在參考文獻清單前，您可能無法看到全部的來源') );
 					}
 				}
 
 				// <ref> without {{reflist}}
 				if ( refBeginMatches.length && !hasReflist ) {
-					addWarning( '页面中包含<ref>标签，但是没有{{reflist}}，您也许不能看到全部的来源' );
+					addWarning( wgULS('页面中包含<ref>标签，但是没有{{reflist}}，您可能无法看到全部的来源','頁面中包含<ref>標籤，但是沒有{{reflist}}，您可能無法看到全部的來源') );
 				}
 
 				deferred.resolve();
@@ -975,8 +986,8 @@
 					return;
 				}
 
-				addWarning( '页面"' + afchSubmission.shortTitle + '"曾经被删除过' + rawDeletions.length + ( rawDeletions.length === 10 ? '+' : '' ) +
-					'次' + ( rawDeletions.length > 1 ? '' : '' ) + '', '(查看删除日志)', function () {
+				addWarning( wgULS('页面“','頁面「') + afchSubmission.shortTitle + wgULS('”曾经被删除过','」曾經被刪除過') + rawDeletions.length + ( rawDeletions.length === 10 ? '+' : '' ) +
+					wgULS('次','次') + ( rawDeletions.length > 1 ? '' : '' ) + '', wgULS('（查看删除日志）','（查看刪除日誌）'), function () {
 					var $toggleLink = $( this ).addClass( 'deletion-log-toggle' ),
 						$warningDiv = $toggleLink.parent(),
 						deletions = [];
@@ -1015,15 +1026,15 @@
 				isOwnReview = afchSubmission.params.reviewer === AFCH.consts.user;
 
 				if ( isOwnReview ) {
-					reviewer = '您';
+					reviewer = wgULS('您','您');
 				} else {
-					reviewer = afchSubmission.params.reviewer || '其他人';
+					reviewer = afchSubmission.params.reviewer || wgULS('其他人','其他人');
 				}
 
 				addWarning( reviewer + ( afchSubmission.params.reviewts ?
-					'在' + AFCH.relativeTimeSince( afchSubmission.params.reviewts ) + '开始审阅这篇草稿' :
-					' 已经开始审阅这篇草稿' ) + '.',
-				isOwnReview ? '取消标记为正在审阅' : '查看页面历史',
+					wgULS('在','在') + AFCH.relativeTimeSince( afchSubmission.params.reviewts ) + wgULS('开始审阅这篇草稿','開始審閱這篇草稿') :
+					wgULS('已经开始审阅这篇草稿','已經開始審閱這篇草稿') ) + '.',
+				isOwnReview ? wgULS('取消标记为正在审阅','取消標記為正在審閱') : wgULS('查看页面历史','查看頁面歷史'),
 				isOwnReview ? function () {
 					handleMark( /* unmark */ true );
 				} : mw.util.getUrl( AFCH.consts.pagename, { action: 'history' } ) );
@@ -1044,8 +1055,8 @@
 					oneComment = numberOfComments === 1;
 
 				if ( numberOfComments ) {
-					addWarning( '页面中包含' + ( oneComment ? '' : '多个' ) + '超过30字节的HTML注释' + ( oneComment ? '' : '' ) +
-						'', '(查看注释内容)' + ( oneComment ? '' : '' ), function () {
+					addWarning( wgULS('页面中包含','頁面中包含') + ( oneComment ? '' : wgULS('多个','多個') ) + wgULS('超过30字节的HTML注释','超過30字元的HTML注釋') + ( oneComment ? '' : '' ) +
+						'', wgULS('（查看注释内容）','（查看注釋內容）') + ( oneComment ? '' : '' ), function () {
 						var $toggleLink = $( this ).addClass( 'long-comment-toggle' ),
 							$warningDiv = $( this ).parent(),
 							$commentsWrapper = $( '<div>' )
@@ -1062,7 +1073,7 @@
 
 						// Now change the "View comment" link to behave as a normal toggle for .long-comments
 						AFCH.makeToggle( '.long-comment-toggle', '.long-comments',
-							'(查看注释内容)' + ( oneComment ? '' : '' ), '(隐藏注释内容)' + ( oneComment ? '' : '' ) );
+							wgULS('（查看注释内容）','（查看注釋內容）') + ( oneComment ? '' : '' ), wgULS('（隐藏注释内容）','（隱藏注釋內容）') + ( oneComment ? '' : '' ) );
 
 						return false;
 					} );
@@ -1124,7 +1135,7 @@
 			// $1 = article name
 			'o7-submission': '{{subst:Db-afc-notice|$1}} ~~' + '~~',
 
-			'teahouse-invite': '{{subst:Wikipedia:Teahouse/AFC invitation|sign=~~' + '~~}}'
+			'teahouse-invite': '{{subst:AFC invitation|sign=~~' + '~~}}'
 		} );
 	}
 
@@ -1162,7 +1173,7 @@
 
 		// Update the button show the `running` text
 		$submitBtn
-			.text( $submitBtn.data( '运行中' ) )
+			.text( $submitBtn.data( wgULS('运行中','運行中') ) )
 			.addClass( 'disabled' )
 			.off( 'click' );
 
@@ -1180,24 +1191,24 @@
 	function setupAjaxStopHandler() {
 		$( document ).ajaxStop( function () {
 			$afch.find( '#afchSubmitForm' )
-				.text( '完成' )
+				.text( wgULS('完成','完成') )
 				.append(
 					' ',
 					$( '<a>' )
 						.attr( 'id', 'reloadLink' )
 						.addClass( 'text-smaller' )
 						.attr( 'href', mw.util.getUrl() )
-						.text( '(重新加载...)' )
+						.text( wgULS('（重新加载...）','（重新載入...）') )
 				);
 
 			// Show a link to the next random submissions
 			new AFCH.status.Element( '前往$1 &raquo;', {
-				$1: AFCH.makeLinkElementToCategory( '正在等待審核的草稿', '随机草稿' ),
+				$1: AFCH.makeLinkElementToCategory( '正在等待審核的草稿',  wgULS('随机草稿','隨機草稿') ),
 			} );
 
 			// Also, automagically reload the page in place
 			$( '#mw-content-text' ).load( AFCH.consts.pagelink + ' #mw-content-text', function () {
-				$afch.find( '#reloadLink' ).text( '(点击重新加载)' );
+				$afch.find( '#reloadLink' ).text( wgULS('（点击重新加载）','（點擊重新載入）') );
 				// Fire the hook for new page content
 				mw.hook( 'wikipage.content' ).fire( $( '#mw-content-text' ) );
 			} );
@@ -1316,7 +1327,7 @@
 						try {
 							window.localStorage[ lsKey ] = JSON.stringify( wikiProjects );
 						} catch ( e ) {
-                            AFCH.log( '无法缓存维基专题列表：' + e.message );
+                            AFCH.log( wgULS('无法缓存维基专题列表：','無法暫存維基專題列表') + e.message );
 						}
 					}
 
@@ -1345,12 +1356,12 @@
 					allow_single_deselect: true,
 					disable_search: true,
 					width: '140px',
-					placeholder_text_single: '点击选中'
+					placeholder_text_single: wgULS('点击选中','點擊選中')
 				} );
 
 				$afch.find( '#newWikiProjects' ).chosen( {
-					placeholder_text_multiple: '输入以寻找维基专题...',
-					no_results_text: '未找到...',
+					placeholder_text_multiple: wgULS('输入以寻找维基专题...','輸入以尋找維基專題...'),
+					no_results_text: wgULS('未找到...','未找到...'),
 					width: '350px'
 				} );
 
@@ -1367,10 +1378,10 @@
 					if ( $noResults.length ) {
 						$( '<div>' )
 							.appendTo( $noResults.empty() )
-                            .text( '糟糕，数据库中没有匹配的维基专题！' )
+                            .text( wgULS('错误：数据库中没有匹配的维基专题。','錯誤：資料庫中沒有匹配的維基專題。') )
 							.append(
 								$( '<a>' )
-                                .text( '点击手动添加{{' + newProject + '}}至讨论页' )
+                                .text(wgULS('点击手动添加{{','點擊手動添加{{') + newProject + wgULS('}}至讨论页','}}到討論頁') )
 									.click( function () {
 										var $wikiprojects = $afch.find( '#newWikiProjects' );
 
@@ -1388,7 +1399,7 @@
 				} );
 
 				$afch.find( '#newCategories' ).chosen( {
-					placeholder_text_multiple: '输入以添加分类...',
+					placeholder_text_multiple: wgULS('输入以添加分类...','輸入以添加分類...') ,
 					width: '350px'
 				} );
 
@@ -1492,7 +1503,7 @@
 					$status.text( '' );
 					$submitButton
 						.removeClass( 'disabled' )
-						.text( '接受并移动到条目空间' );
+						.text( wgULS('接受并移动到条目名字空间','接受並移動到條目命名空間') );
 
 					// If there is no value, die now, because otherwise mw.Title
 					// will throw an exception due to an invalid title
@@ -1507,7 +1518,7 @@
 						titles: 'Talk:' + page.rawTitle
 					} ).done( function ( data ) {
 						if ( !data.query.pages.hasOwnProperty( '-1' ) ) {
-							$status.html(  linkToPage + '的讨论页已经存在' );
+							$status.html(  linkToPage + wgULS('的讨论页已经存在','的討論頁已經存在') );
 						}
 					} );
 
@@ -1525,8 +1536,8 @@
 
 						// If the page already exists, display an error
 						if ( !data.query.pages.hasOwnProperty( '-1' ) ) {
-							errorHtml = '给定的目标页面"' + linkToPage + '"已经存在';
-							buttonText = '给定的目标页面已经存在';
+							errorHtml = wgULS('给定的目标页面“','給定的目標頁面「') + linkToPage + wgULS('”已经存在','」已經存在');
+							buttonText = wgULS('给定的目标页面已经存在','給定的目標頁面已經存在');
 						} else {
 							// If the page doesn't exist but IS create-protected and the
 							// current reviewer is not an admin, also display an error
@@ -1534,8 +1545,8 @@
 							$.each( data.query.pages[ '-1' ].protection, function ( _, entry ) {
 								if ( entry.type === 'create' && entry.level === 'sysop' &&
 									$.inArray( 'sysop', mw.config.get( 'wgUserGroups' ) ) === -1 ) {
-									errorHtml = 'Darn it, "' + linkToPage + '"已被白纸保护。在接受之前，您需要请求解除保护。';
-									buttonText = '目标页面已被白纸保护';
+									errorHtml = wgULS('给定的目标页面“','給定的目標頁面「') + linkToPage + wgULS('”已被白纸保护。在接受之前，您需要请求解除保护。','」已被白紙保護。在接受之前，您需要請求解除保護。');
+									buttonText = wgULS('目标页面已被白纸保护','目標頁面已被白紙保護');
 								}
 							} );
 						}
@@ -1543,8 +1554,8 @@
 						// Now check the blacklist result, but if another error already exists,
 						// don't bother showing this one too
 						if ( !errorHtml && isBlacklisted !== false ) {
-							errorHtml = 'Shoot! ' + isBlacklisted.reason.replace( /\s+/g, ' ' );
-							buttonText = '目标页面在标题黑名单中';
+							errorHtml = wgULS('给定的目标页面“','給定的目標頁面「') + linkToPage + wgULS('”和<a href="/wiki/Mediawiki:Titleblacklist">本地</a>或<a href="/wiki/m:Title blacklist">全域</a>黑名单<code>','」和<a href="/wiki/Mediawiki:Titleblacklist">本地</a>或<a href="/wiki/m:Title blacklist">全域</a>黑名單<code>') + isBlacklisted.reason.replace( /\s+/g, ' ' ) + wgULS('</code>配合而禁止建立。','</code>配合而禁止建立。');
+							buttonText = wgULS('目标页面在标题黑名单中','目標頁面在標題黑名單中');
 						}
 
 						if ( !errorHtml ) {
@@ -1612,7 +1623,7 @@
 
 				$reasons = $afch.find( '#declineReason' );
 				$commonSection = $( '<optgroup>' )
-					.attr( 'label', '经常使用' )
+					.attr( 'label', wgULS('经常使用','經常使用') )
 					.insertBefore( $reasons.find( 'optgroup' ).first() );
 
 				// Show the 5 most used options
@@ -1624,8 +1635,8 @@
 
 			// Set up jquery.chosen for the decline reason
 			$afch.find( '#declineReason' ).chosen( {
-				placeholder_text_single: '选择一个草稿仍需改善的理由...',
-				no_results_text: '搜索不到关键词，请选择自定义理由，自行撰写理由',
+				placeholder_text_single: wgULS('选择一个草稿仍需改善的理由...','選擇一個草稿仍需改善的理由...'),
+				no_results_text: wgULS('搜索不到关键词，请选择自定义理由，自行撰写理由','搜索不到關鍵詞，請選擇自定義理由，自行撰寫理由'),
 				search_contains: true,
 				inherit_select_classes: true,
 				max_selected_options: 2
@@ -1633,7 +1644,7 @@
 
 			// Set up jquery.chosen for the reject reason
 			$afch.find( '#rejectReason' ).chosen( {
-				placeholder_text_single: '选择一个拒绝再次提交草稿的理由...',
+				placeholder_text_single: wgULS('选择一个拒绝再次提交草稿的理由...','選擇一個拒絕再次提交草稿的理由...'),
 				search_contains: true,
 				inherit_select_classes: true,
 				max_selected_options: 2
@@ -1661,12 +1672,12 @@
 									$( this ).removeClass( 'bad-input' );
 									submitButton
 										.removeClass( 'disabled' )
-										.text( '拒绝草稿' );
+										.text( wgULS('拒绝草稿','拒絕草稿') );
 								} else {
 									$( this ).addClass( 'bad-input' );
 									submitButton
 										.addClass( 'disabled' )
-										.text( '请添加1-3个网址' );
+										.text( wgULS('请添加1-3个网址','請添加1-3個網址') );
 								}
 							} );
 
@@ -1680,35 +1691,35 @@
 												'max-width': '50%',
 												margin: '0px auto'
 											} )
-											.text( '草稿讨论页存在OTRS模板，在将此草稿标记为侵犯版权之前，请进行确认。' ) );
+											.text( wgULS('草稿讨论页存在OTRS模板，在将此草稿标记为侵犯版权之前，请进行确认。','草稿討論頁存在OTRS模板，在將此草稿標記為侵權前，請進行確認。') ) );
 								}
 							} );
 						},
 
 						dup: function ( pos ) {
-							updateTextfield( '另一重复提交的页面名称（不含命名空间）', 'Articles for creation/Fudge', candidateDupeName, pos );
+							updateTextfield( wgULS('另一重复提交的页面名称（不含名字空间）','另一個重複提交的頁面名稱（不含命名空間）'), 'Articles for creation/Fudge', candidateDupeName, pos );
 						},
 
 						mergeto: function ( pos ) {
-							updateTextfield( '应该合并至的页面', 'Milkshake', candidateDupeName, pos );
+							updateTextfield( wgULS('应该合并至的页面','應該要合併到的頁面'), 'Milkshake', candidateDupeName, pos );
 						},
 
 						lang: function ( pos ) {
-							updateTextfield( '内容的语言(如知道)', '英语', pos );
+							updateTextfield( wgULS('内容的语言(如果知道)','內容的語言（如果知道）'), wgULS('英语','英語'), pos );
 						},
 
 						exists: function ( pos ) {
-                            updateTextfield('已存在条目的标题', '巧克力曲奇', candidateDupeName, pos );
+							updateTextfield( wgULS('已存在条目的标题','已存在的條目的標題'), '', candidateDupeName, pos );
 						},
 
 						plot: function ( pos ) {
-                            updateTextfield('已有相关条目的标题（如果存在）', '查理和巧克力工厂', candidateDupeName, pos );
+							updateTextfield( wgULS('已有相关条目的标题（如果存在）','已有相關條目的標題（如果存在）'), '', candidateDupeName, pos );
 						},
 
 						// Custom decline rationale
 						reason: function () {
 							$afch.find( '#declineTextarea' )
-								.attr( 'placeholder', '写下自定义的拒绝理由，可以使用维基语法' );
+								.attr( 'placeholder', wgULS('写下自定义的拒绝理由，可以使用维基语法','寫下自定義的拒絕理由，可以使用維基語法') );
 						}
 					};
 
@@ -1728,7 +1739,7 @@
 				$afch.find( '#declineTextarea' ).val( prevDeclineComment );
 
 				// If the user wants a preview, show it
-				if ( $( '#previewTrigger' ).text() == '(隐藏预览)' ) {
+				if ( $( '#previewTrigger' ).text() == wgULS('（隐藏预览）','（隱藏預覽）') ) {
 					$( '#previewContainer' )
 						.empty()
 						.append( $.createSpinner( {
@@ -1759,7 +1770,7 @@
 			// Attach the preview event listener
 			$afch.find( '#previewTrigger' ).click( function () {
 				var reason = $afch.find( '#declineReason' ).val();
-				if ( this.textContent == '(显示预览)' && reason ) {
+				if ( this.textContent == wgULS('（显示预览）','（顯示預覽）') && reason ) {
 					$( '#previewContainer' )
 						.empty()
 						.append( $.createSpinner( {
@@ -1772,10 +1783,10 @@
 							.html( Array.prototype.slice.call( arguments )
 								.join( '<hr />' ) );
 					} );
-					this.textContent = '(隐藏预览)';
+					this.textContent = wgULS('（隐藏预览）','（隱藏預覽）');
 				} else {
 					$( '#previewContainer' ).empty();
-					this.textContent = '(显示预览)';
+					this.textContent = wgULS('（显示预览）','（顯示預覽）');
 				}
 			} );
 
@@ -1805,7 +1816,7 @@
 		$.each( afchSubmission.submitters, function ( index, submitter ) {
 			customSubmitters.push( {
 				name: submitter,
-				description: submitter + ( index === 0 ? ' (最近的提交者)' : ' (过去的提交者)' ),
+				description: submitter + ( index === 0 ? wgULS('（最近的提交者）','（最近的提交者）') : wgULS('（过去的提交者）','（過去的提交者）') ),
 				selected: index === 0
 			} );
 		} );
@@ -1820,7 +1831,7 @@
 				$afch.find( '#submitterNameStatus' ).text( '' );
 				$afch.find( '#afchSubmitForm' )
 					.removeClass( 'disabled' )
-					.text( '提交' );
+					.text( wgULS('提交','提交') );
 			}
 
 			// Show the other textbox when `other` is selected in the menu
@@ -1869,10 +1880,10 @@
 					} ).done( function ( data ) {
 						if ( data.query.users[ 0 ].missing !== undefined ) {
 							field.addClass( 'bad-input' );
-							status.text( '没有叫 "' + submitter + '"的用户' );
+							status.text( wgULS('没有叫“',wgULSv2('沒有叫「','「')) + submitter + wgULS('”的用户',wgULSv2('」的用戶','」的使用者')) );
 							submitButton
 								.addClass( 'disabled' )
-								.text( '该用户名不存在' );
+								.text( wgULS('该用户名不存在',wgULSv2('該用戶名不存在','該使用者名稱不存在')) );
 						}
 					} );
 				} );
@@ -1893,8 +1904,7 @@
 	function handleAccept( data ) {
 		var newText = data.afchText;
 
-		AFCH.actions.movePage( afchPage.rawTitle, data.newTitle,
-			'发布已接受的[[WP:AFC|条目建立]]草稿',
+		AFCH.actions.movePage( afchPage.rawTitle, data.newTitle, wgULS('发布已接受的[[WP:AFC|条目建立]]草稿','發布已接受的[[WP:AFC|條目建立]]草稿'),
 			{ movetalk: true, noredirect: true } ) // Also move associated talk page if exists (e.g. `Draft_talk:`)
 			.done( function ( moveData ) {
 				var $patrolLink,
@@ -1918,7 +1928,7 @@
 
 					// {{subst:L}}, which generates DEFAULTSORT as well as
 					// adds the appropriate birth/death year categories
-					newText.append( '\n{{subst:L' +
+					newText.append( '\n{{Bd' +
 						'|1=' + data.birthYear +
 						'|2=' + ( data.deathYear || '' ) +
 						'|3=' + data.subjectName + '}}'
@@ -2023,7 +2033,7 @@
 			declineReason2 = data.declineReason.length > 1 ? data.declineReason[ 1 ] : null,
 			newParams = {
 				decliner: AFCH.consts.user,
-				declinets: '{{subst:REVISIONTIMESTAMP}}'
+				declinets: '{{subst:' + 'REVISIONTIMESTAMP}}'
 			};
 
 		if ( isDecline ) {
