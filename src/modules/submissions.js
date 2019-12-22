@@ -1,5 +1,6 @@
 /* https://github.com/94rain/afch-zhwp, translated and adapted from https://github.com/WPAFC/afch-rewrite */
 //<nowiki>
+
 window.wgUXSv2 = function (wg, hant, tw) {
     var ret = {
         'zh-hant': hant || hk || mo,
@@ -11,6 +12,7 @@ window.wgUXSv2 = function (wg, hant, tw) {
 window.wgULSv2 = function (hant, tw) {
     return wgUXSv2(mw.config.get('wgUserLanguage'),hant, tw);
 };
+
 ( function ( AFCH, $, mw ) {
 	var $afchLaunchLink, $afch, $afchWrapper,
 		afchPage, afchSubmission, afchViews, afchViewer;
