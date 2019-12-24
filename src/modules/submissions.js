@@ -1556,7 +1556,7 @@ window.wgULSv2 = function (hant, tw) {
 						// Now check the blacklist result, but if another error already exists,
 						// don't bother showing this one too
 						if ( !errorHtml && isBlacklisted !== false ) {
-							errorHtml = wgULS('给定的目标页面“','給定的目標頁面「') + linkToPage + wgULS('”和<a href="/wiki/Mediawiki:Titleblacklist">本地</a>或<a href="/wiki/m:Title blacklist">全域</a>黑名单<code>','」和<a href="/wiki/Mediawiki:Titleblacklist">本地</a>或<a href="/wiki/m:Title blacklist">全域</a>黑名單<code>') + isBlacklisted.reason.replace( /\s+/g, ' ' ) + wgULS('</code>配合而禁止建立。','</code>配合而禁止建立。');
+							errorHtml = wgULS('给定的目标页面“','給定的目標頁面「') + linkToPage + wgULS('”和<a href="/wiki/Mediawiki:Titleblacklist">本地</a>或<a href="/wiki/m:Title blacklist">全域</a>黑名单<code>','」和<a href="/wiki/Mediawiki:Titleblacklist">本地</a>或<a href="/wiki/m:Title blacklist">全域</a>黑名單<code>') + isBlacklisted.reason.replace( /^(.*)<code>(.*)<\/code>(.*)$/, '$2' ) + wgULS('</code>配合而禁止建立。','</code>配合而禁止建立。');
 							buttonText = wgULS('目标页面在标题黑名单中','目標頁面在標題黑名單中');
 						}
 
