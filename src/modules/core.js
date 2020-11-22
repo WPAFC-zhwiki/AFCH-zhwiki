@@ -999,7 +999,8 @@ var Hogan = {};
 					rvdir: 'newer',
 					rvlimit: 1,
 					indexpageids: true,
-					titles: this.rawTitle
+					titles: this.rawTitle,
+					tool: 'AFCH'
 				};
 
 				// FIXME: Handle failure more gracefully
@@ -1090,7 +1091,8 @@ var Hogan = {};
 					rvprop: rvprop,
 					format: 'json',
 					indexpageids: true,
-					titles: pagename
+					titles: pagename,
+					tool: 'AFCH'
 				};
 
 				$.extend(request, options.moreParameters || {});
