@@ -1000,7 +1000,7 @@ var Hogan = {};
 					rvlimit: 1,
 					indexpageids: true,
 					titles: this.rawTitle,
-					tool: AFCH
+					tool: 'AFCH'
 				};
 
 				// FIXME: Handle failure more gracefully
@@ -1092,7 +1092,7 @@ var Hogan = {};
 					format: 'json',
 					indexpageids: true,
 					titles: pagename,
-					tool: AFCH
+					tool: 'AFCH'
 				};
 
 				$.extend(request, options.moreParameters || {});
