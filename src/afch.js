@@ -13,8 +13,8 @@
 			// `submissions.js` is for reviewing textual
 			// Articles for Creation submissions.
 			submissions: [
-				'Wikipedia:建立條目專題/',
-				'Wikipedia talk:建立條目專題/',
+				'WikiProject:建立條目/',
+				'WikiProject_talk:建立條目/',
 				'User:',
 				'Draft:'
 			]

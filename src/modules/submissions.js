@@ -1906,13 +1906,13 @@ window.wgULSv2 = function (hant, tw) {
 	function handleAccept( data ) {
 		var newText = data.afchText;
 
-		AFCH.actions.movePage( afchPage.rawTitle, data.newTitle, wgULS('发布已接受的[[WP:AFC|条目建立]]草稿','發布已接受的[[WP:AFC|條目建立]]草稿'),
+		AFCH.actions.movePage( afchPage.rawTitle, data.newTitle, wgULS('发布已接受的[[P:AFC|条目建立]]草稿','發布已接受的[[P:AFC|條目建立]]草稿'),
 			{ movetalk: true, noredirect: true } ) // Also move associated talk page if exists (e.g. `Draft_talk:`)
 			.done( function ( moveData ) {
 				var $patrolLink,
 					newPage = new AFCH.Page( moveData.to ),
 					talkPage = newPage.getTalkPage(),
-					recentPage = new AFCH.Page( 'Wikipedia:建立條目專題/近期創建' ),
+					recentPage = new AFCH.Page( 'WikiProject:建立條目/近期創建' ),
 					talkText = '';
 
 				// ARTICLE
@@ -1940,7 +1940,7 @@ window.wgULSv2 = function (hant, tw) {
 
 				newPage.edit( {
 					contents: newText.get(),
-					summary: '清理已接受的[[WP:AFC|条目建立]]草稿'
+					summary: '清理已接受的[[P:AFC|条目建立]]草稿'
 				} );
 
 				// Patrol the new page if desired
@@ -1985,7 +1985,7 @@ window.wgULSv2 = function (hant, tw) {
 					// (e.g. pages in `Draft:` namespace with discussion)
 					mode: 'prependtext',
 					contents: talkText + '\n\n',
-					summary: wgULS('放置[[Wikipedia:WPAFC|条目建立专题]]模板','放置[[Wikipedia:WPAFC|條目建立專題]]模板')
+					summary: wgULS('放置[[P:AFC|条目建立专题]]模板','放置[[P:AFC|條目建立專題]]模板')
 				} );
 
 				// NOTIFY SUBMITTER

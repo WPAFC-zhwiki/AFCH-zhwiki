@@ -640,7 +640,7 @@ var Hogan = {};
 				// Require users to be on whitelist to use the script
 				whitelistRequired: true,
 				// Name of the whitelist page for reviewers
-				whitelistTitle: 'Wikipedia:建立條目專題/參與者'
+				whitelistTitle: 'WikiProject:建立條目/參與者'
 			}, AFCH.consts);
 
 			// Check whitelist if necessary, but don't delay loading of the
@@ -710,7 +710,7 @@ var Hogan = {};
 							.append(AFCH.makeLinkElementToPage(whitelist.rawTitle))
 							.append(wgULS('。您可以在那里申请使用AFC辅助脚本的权限。', '。您可以在那裡申請使用AFC輔助腳本的權限。'))
 							.append($howToDisable)
-							.append(wgULS('如果您有任何问题或疑虑，请在', '如果您有任何問題或疑慮，請在'))
+							.append(wgULS('如果您有任何问题或疑虑，请', '如果您有任何問題或疑慮，請'))
 							.append(AFCH.makeLinkElementToPage('WT:AFCH', wgULS('寻求帮助', '尋求幫助')))
 							.append('!'),
 						{
@@ -767,8 +767,8 @@ var Hogan = {};
 		initFeedback: function ($element, type, linkText) {
 			var feedback = new mw.Feedback({
 				title: new mw.Title('Wikipedia talk:建立條目專題/協助腳本'),
-				bugsLink: 'https://zh.wikipedia.org/w/index.php?title=Wikipedia_talk:建立條目專題/協助腳本&action=edit&section=new',
-				bugsListLink: 'https://zh.wikipedia.org/w/index.php?title=Wikipedia_talk:建立條目專題/協助腳本'
+				bugsLink: 'https://zh.wikipedia.org/w/index.php?title=WikiProject_talk:建立條目/協助腳本&action=edit&section=new',
+				bugsListLink: 'https://zh.wikipedia.org/w/index.php?title=WikiProject_talk:建立條目/協助腳本'
 			});
 			$('<span>')
 				.text(linkText || wgULS('提供反馈！', '提供反饋！'))
