@@ -640,7 +640,7 @@ var Hogan = {};
 				// Require users to be on whitelist to use the script
 				whitelistRequired: true,
 				// Name of the whitelist page for reviewers
-				whitelistTitle: 'Wikipedia:建立條目專題/參與者'
+				whitelistTitle: 'WikiProject:建立條目/參與者'
 			}, AFCH.consts);
 
 			// Check whitelist if necessary, but don't delay loading of the
