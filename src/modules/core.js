@@ -710,7 +710,7 @@ var Hogan = {};
 							.append(AFCH.makeLinkElementToPage(whitelist.rawTitle))
 							.append(wgULS('。您可以在那里申请使用AFC辅助脚本的权限。', '。您可以在那裡申請使用AFC輔助腳本的權限。'))
 							.append($howToDisable)
-							.append(wgULS('如果您有任何问题或疑虑，请在', '如果您有任何問題或疑慮，請在'))
+							.append(wgULS('如果您有任何问题或疑虑，请', '如果您有任何問題或疑慮，請'))
 							.append(AFCH.makeLinkElementToPage('WT:AFCH', wgULS('寻求帮助', '尋求幫助')))
 							.append('!'),
 						{
