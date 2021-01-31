@@ -767,8 +767,8 @@ var Hogan = {};
 		initFeedback: function ($element, type, linkText) {
 			var feedback = new mw.Feedback({
 				title: new mw.Title('Wikipedia talk:建立條目專題/協助腳本'),
-				bugsLink: 'https://zh.wikipedia.org/w/index.php?title=Wikipedia_talk:建立條目專題/協助腳本&action=edit&section=new',
-				bugsListLink: 'https://zh.wikipedia.org/w/index.php?title=Wikipedia_talk:建立條目專題/協助腳本'
+				bugsLink: 'https://zh.wikipedia.org/w/index.php?title=WikiProject_talk:建立條目/協助腳本&action=edit&section=new',
+				bugsListLink: 'https://zh.wikipedia.org/w/index.php?title=WikiProject_talk:建立條目/協助腳本'
 			});
 			$('<span>')
 				.text(linkText || wgULS('提供反馈！', '提供反饋！'))
